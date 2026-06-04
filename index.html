@@ -1,0 +1,2773 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset
+
+  .master-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+    background: var(--accent);
+    color: #fff;
+    border: 1.5px solid transparent;
+    border-radius: 100px;
+    padding: 13px 26px;
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.18s;
+    white-space: nowrap;
+    box-shadow: 0 2px 10px rgba(156,106,58,0.22);
+  }
+
+  .master-btn:active { transform: scale(0.96); }
+
+  .master-btn.paused {
+    background: transparent;
+    border-color: var(--accent);
+    color: var(--accent);
+    box-shadow: none;
+  }
+
+  .master-btn.done-state {
+    background: var(--green);
+    border-color: transparent;
+    box-shadow: 0 2px 10px rgba(74,122,58,0.22);
+  }
+
+  .master-btn:disabled { opacity: 0.45; cursor: default; box-shadow: none; }
+="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>V60 Pour Over</title>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="V60 Guide">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#faf8f5">
+<meta name="description" content="V60 Pour Over brew guide with ratio calculator and step timer">
+
+<!-- Inline SVG favicon -->
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23faf8f5'/%3E%3Cpath d='M16 22 L32 50 L48 22' stroke='%239c6a3a' stroke-width='3' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3Cellipse cx='32' cy='22' rx='12' ry='4' stroke='%239c6a3a' stroke-width='3' fill='none'/%3E%3Cline x1='32' y1='50' x2='32' y2='56' stroke='%239c6a3a' stroke-width='3' stroke-linecap='round'/%3E%3Cline x1='24' y1='57' x2='40' y2='57' stroke='%239c6a3a' stroke-width='3' stroke-linecap='round'/%3E%3C/svg%3E">
+
+<!-- Apple touch icon (inline SVG as data URI) -->
+<link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'%3E%3Crect width='180' height='180' rx='40' fill='%23faf8f5'/%3E%3Cpath d='M44 60 L90 140 L136 60' stroke='%239c6a3a' stroke-width='8' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3Cellipse cx='90' cy='60' rx='34' ry='11' stroke='%239c6a3a' stroke-width='8' fill='none'/%3E%3Cline x1='90' y1='140' x2='90' y2='158' stroke='%239c6a3a' stroke-width='8' stroke-linecap='round'/%3E%3Cline x1='68' y1='162' x2='112' y2='162' stroke='%239c6a3a' stroke-width='8' stroke-linecap='round'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500;600&family=DM+Mono:wght@300;400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #faf8f5;
+    --surface: #ffffff;
+    --surface2: #f2ede8;
+    --border: #e4ddd6;
+    --border2: #cfc6bc;
+    --text: #2a2018;
+    --text-muted: #8a7a6a;
+    --text-dim: #bfb3a6;
+    --accent: #9c6a3a;
+    --accent2: #b8895a;
+    --accent-glow: rgba(156,106,58,0.10);
+    --white: #2a2018;
+    --red: #b04040;
+    --green: #4a7a3a;
+    --mono: 'DM Mono', monospace;
+    --serif: 'Cormorant Garamond', serif;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--serif);
+    font-size: 17px;
+    line-height: 1.6;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+
+  /* ── SAFE AREA / PWA ── */
+  html, body {
+    overscroll-behavior: none;
+    -webkit-tap-highlight-color: transparent;
+    -webkit-touch-callout: none;
+    touch-action: manipulation;
+  }
+
+  /* Sidebar: push down past notch/island on desktop-ish portrait iPads */
+  .sidebar {
+    padding-top: max(40px, env(safe-area-inset-top));
+    padding-left: max(0px, env(safe-area-inset-left));
+  }
+
+  /* Topbar: sits BELOW the Dynamic Island / notch — extra top padding */
+  .topbar {
+    padding-left: max(20px, env(safe-area-inset-left));
+    padding-right: max(20px, env(safe-area-inset-right));
+    /* Push content below island: use padding-top not height so text sits right */
+    padding-top: max(14px, calc(env(safe-area-inset-top) + 6px));
+    height: calc(56px + env(safe-area-inset-top));
+    align-items: flex-end;
+    padding-bottom: 10px;
+  }
+
+  /* Bottom nav: always above home indicator */
+  .mobile-nav {
+    padding-bottom: max(8px, env(safe-area-inset-bottom));
+    height: calc(58px + env(safe-area-inset-bottom));
+    padding-left: env(safe-area-inset-left);
+    padding-right: env(safe-area-inset-right);
+  }
+
+  /* Sections: never hidden behind bottom nav */
+  .section {
+    padding-bottom: calc(90px + env(safe-area-inset-bottom));
+  }
+
+  /* ── LAYOUT SHELL ── */
+  .app {
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    min-height: 100vh;
+  }
+
+  /* ── SIDEBAR (DESKTOP) ── */
+  .sidebar {
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow-y: auto;
+    padding: 40px 0;
+  }
+
+  .sidebar-logo {
+    padding: 0 32px 40px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .logo-mark {
+    width: 48px;
+    height: 48px;
+    margin-bottom: 16px;
+  }
+
+  .logo-title {
+    font-family: var(--serif);
+    font-size: 22px;
+    font-weight: 300;
+    letter-spacing: 0.04em;
+    color: var(--white);
+    line-height: 1.2;
+  }
+
+  .logo-sub {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    margin-top: 4px;
+  }
+
+  .sidebar-nav {
+    padding: 32px 0;
+    flex: 1;
+  }
+
+  .nav-section {
+    padding: 0 32px;
+    margin-bottom: 32px;
+  }
+
+  .nav-label {
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    margin-bottom: 12px;
+  }
+
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-family: var(--serif);
+    font-size: 14px;
+    font-weight: 400;
+    color: var(--text-muted);
+    letter-spacing: 0.02em;
+    transition: all 0.2s;
+    margin-bottom: 2px;
+    border: none;
+    background: none;
+    width: 100%;
+    text-align: left;
+  }
+
+  .nav-item:hover { color: var(--text); background: var(--accent-glow); }
+  .nav-item.active { color: var(--accent); background: var(--accent-glow); }
+
+  .nav-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: currentColor;
+    opacity: 0.5;
+    flex-shrink: 0;
+  }
+
+  .nav-item.active .nav-dot { opacity: 1; }
+
+  .sidebar-footer {
+    padding: 24px 32px 0;
+    border-top: 1px solid var(--border);
+  }
+
+  .sidebar-footer-text {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--text-dim);
+    letter-spacing: 0.08em;
+  }
+
+  /* ── MAIN CONTENT ── */
+  .main {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+  }
+
+  .topbar {
+    display: none;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: rgba(250,248,245,0.96);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border-bottom: 1px solid var(--border);
+    padding: 0 20px;
+    padding-top: env(safe-area-inset-top);
+    height: calc(56px + env(safe-area-inset-top));
+    align-items: flex-end;
+    padding-bottom: 10px;
+    justify-content: space-between;
+  }
+
+  .topbar-title {
+    font-family: var(--serif);
+    font-size: 18px;
+    font-weight: 300;
+    letter-spacing: 0.04em;
+    color: var(--white);
+  }
+
+  .topbar-menu-btn {
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+    border-radius: 6px;
+    padding: 6px 10px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    transition: all 0.2s;
+  }
+
+  .topbar-menu-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+  /* ── SECTIONS ── */
+  .section {
+    padding: 60px 64px;
+    border-bottom: 1px solid var(--border);
+    display: none;
+  }
+
+  .section.active { display: block; }
+
+  .section-header {
+    margin-bottom: 48px;
+  }
+
+  .section-eyebrow {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 12px;
+  }
+
+  .section-title {
+    font-family: var(--serif);
+    font-size: 42px;
+    font-weight: 300;
+    letter-spacing: 0.02em;
+    color: var(--white);
+    line-height: 1.1;
+  }
+
+  .section-desc {
+    margin-top: 16px;
+    font-size: 16px;
+    font-weight: 300;
+    color: var(--text-muted);
+    max-width: 520px;
+    line-height: 1.7;
+  }
+
+  /* ── RATIO CALCULATOR ── */
+  .ratio-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 32px;
+    max-width: 640px;
+  }
+
+  .ratio-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 28px;
+    grid-column: 1 / -1;
+  }
+
+  .ratio-label-row {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 20px;
+  }
+
+  .ratio-buttons {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .ratio-btn {
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+    padding: 8px 16px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-family: var(--mono);
+    font-size: 12px;
+    letter-spacing: 0.08em;
+    transition: all 0.2s;
+  }
+
+  .ratio-btn:hover { border-color: var(--accent2); color: var(--text); }
+  .ratio-btn.active { border-color: var(--accent); color: var(--accent); background: var(--accent-glow); }
+
+  .input-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 28px;
+  }
+
+  .input-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 12px;
+  }
+
+  .input-wrap {
+    position: relative;
+  }
+
+  .calc-input {
+    width: 100%;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px 48px 14px 16px;
+    font-family: var(--mono);
+    font-size: 22px;
+    color: var(--white);
+    outline: none;
+    transition: border-color 0.2s;
+    -moz-appearance: textfield;
+  }
+
+  .calc-input::-webkit-outer-spin-button,
+  .calc-input::-webkit-inner-spin-button { -webkit-appearance: none; }
+
+  .calc-input:focus { border-color: var(--accent); }
+
+  .input-unit {
+    position: absolute;
+    right: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--text-dim);
+    letter-spacing: 0.1em;
+  }
+
+  .result-card {
+    background: var(--surface);
+    border: 1px solid var(--accent2);
+    border-radius: 12px;
+    padding: 28px;
+    grid-column: 1 / -1;
+  }
+
+  .result-row {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .result-row:last-child { border-bottom: none; }
+
+  .result-key {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+
+  .result-val {
+    font-family: var(--serif);
+    font-size: 26px;
+    font-weight: 500;
+    color: var(--white);
+  }
+
+  .result-val span {
+    font-size: 13px;
+    font-weight: 300;
+    color: var(--text-muted);
+    margin-left: 4px;
+    font-family: var(--mono);
+  }
+
+  /* ── BREW STEPS ── */
+  .steps-container {
+    max-width: 720px;
+  }
+
+  .brew-total {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 20px;
+    margin-bottom: 40px;
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    color: var(--text-muted);
+    text-transform: uppercase;
+  }
+
+  .brew-total strong {
+    color: var(--accent);
+    font-weight: 400;
+  }
+
+  .step-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 32px;
+    margin-bottom: 16px;
+    transition: border-color 0.3s;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .step-card.current {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 1px var(--accent), inset 0 0 40px var(--accent-glow);
+  }
+
+  .step-card.done {
+    border-color: var(--border);
+    opacity: 0.5;
+  }
+
+  .step-card.done .step-number { background: var(--surface2); color: var(--text-dim); }
+
+  .step-top {
+    display: flex;
+    align-items: flex-start;
+    gap: 20px;
+    margin-bottom: 24px;
+  }
+
+  .step-number {
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    background: var(--accent-glow);
+    border: 1px solid var(--accent2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--accent);
+    flex-shrink: 0;
+    transition: all 0.3s;
+  }
+
+  .step-info { flex: 1; }
+
+  .step-title {
+    font-family: var(--serif);
+    font-size: 20px;
+    font-weight: 500;
+    color: var(--white);
+    letter-spacing: 0.02em;
+    margin-bottom: 4px;
+  }
+
+  .step-timing {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    color: var(--accent);
+    text-transform: uppercase;
+  }
+
+  .step-timer-wrap {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex-shrink: 0;
+  }
+
+  /* ── TIMER CIRCLE ── */
+  .timer-ring {
+    position: relative;
+    width: 72px;
+    height: 72px;
+    flex-shrink: 0;
+  }
+
+  .timer-ring svg {
+    transform: rotate(-90deg);
+    width: 72px;
+    height: 72px;
+  }
+
+  .timer-bg { fill: none; stroke: var(--border); stroke-width: 3; }
+
+  .timer-progress {
+    fill: none;
+    stroke: var(--accent);
+    stroke-width: 3;
+    stroke-linecap: round;
+    transition: stroke-dashoffset 0.5s linear;
+  }
+
+  .timer-countdown {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--mono);
+    font-size: 13px;
+    color: var(--white);
+    letter-spacing: 0;
+  }
+
+  .start-btn {
+    background: none;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 18px;
+    color: var(--text-muted);
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
+
+  .start-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .start-btn.running { border-color: var(--red); color: var(--red); }
+  .start-btn.done-btn { border-color: var(--green); color: var(--green); cursor: default; }
+
+  .step-instructions {
+    list-style: none;
+    margin-bottom: 16px;
+  }
+
+  .step-instructions li {
+    display: flex;
+    gap: 12px;
+    padding: 8px 0;
+    font-size: 15px;
+    font-weight: 300;
+    color: var(--text);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .step-instructions li:last-child { border-bottom: none; }
+
+  .step-instructions .li-num {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--text-dim);
+    padding-top: 2px;
+    min-width: 20px;
+    flex-shrink: 0;
+  }
+
+  .step-note {
+    font-size: 13px;
+    font-weight: 300;
+    color: var(--text-muted);
+    font-style: italic;
+    padding-top: 8px;
+    border-top: 1px solid var(--border);
+  }
+
+  .step-water-bar {
+    margin-top: 16px;
+  }
+
+  .water-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 6px;
+    display: flex;
+    justify-content: space-between;
+  }
+
+  .water-track {
+    height: 4px;
+    background: var(--surface2);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+
+  .water-fill {
+    height: 100%;
+    background: linear-gradient(to right, var(--accent2), var(--accent));
+    border-radius: 2px;
+    transition: width 0.5s ease;
+  }
+
+  /* ── LIVE POUR ESTIMATOR ── */
+  .pour-estimator {
+    margin-top: 20px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px 20px;
+    display: none;
+  }
+
+  .pour-estimator.active { display: block; }
+
+  .pour-est-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 14px;
+  }
+
+  .pour-est-label {
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .pour-est-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--accent);
+    animation: pulse-dot 1s ease-in-out infinite;
+  }
+
+  @keyframes pulse-dot {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.4; transform: scale(0.7); }
+  }
+
+  .pour-est-now {
+    font-family: var(--serif);
+    font-size: 28px;
+    font-weight: 500;
+    color: var(--white);
+    line-height: 1;
+  }
+
+  .pour-est-now span {
+    font-size: 13px;
+    font-weight: 300;
+    font-family: var(--mono);
+    color: var(--text-muted);
+    margin-left: 3px;
+  }
+
+  .pour-est-bar-wrap {
+    margin-top: 10px;
+  }
+
+  .pour-est-bar-labels {
+    display: flex;
+    justify-content: space-between;
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: 0.1em;
+    color: var(--text-dim);
+    margin-bottom: 5px;
+  }
+
+  .pour-est-track {
+    height: 6px;
+    background: var(--bg);
+    border-radius: 3px;
+    overflow: hidden;
+    position: relative;
+  }
+
+  .pour-est-fill {
+    height: 100%;
+    border-radius: 3px;
+    background: linear-gradient(to right, var(--accent2), var(--accent));
+    position: relative;
+    min-width: 6px;
+    transition: none;
+  }
+
+  .pour-est-fill::after {
+    content: '';
+    position: absolute;
+    right: 0; top: 0; bottom: 0;
+    width: 12px;
+    background: rgba(255,255,255,0.25);
+    border-radius: 3px;
+    animation: pour-glint 0.8s ease-in-out infinite;
+  }
+
+  @keyframes pour-glint {
+    0%, 100% { opacity: 0; }
+    50% { opacity: 1; }
+  }
+
+  .pour-est-range {
+    margin-top: 10px;
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: 0.1em;
+    color: var(--text-dim);
+    text-transform: uppercase;
+  }
+
+  .pour-est-range strong {
+    color: var(--text-muted);
+    font-weight: 400;
+  }
+
+  /* ── COUNTDOWN OVERLAY ── */
+  .countdown-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(250,248,245,0.94);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s;
+  }
+
+  .countdown-overlay.active {
+    opacity: 1;
+    pointer-events: all;
+  }
+
+  .countdown-number {
+    font-family: var(--serif);
+    font-size: 140px;
+    font-weight: 300;
+    color: var(--white);
+    line-height: 1;
+    opacity: 0;
+    transform: scale(1.4);
+    transition: all 0.3s cubic-bezier(0.34,1.56,0.64,1);
+  }
+
+  .countdown-number.show {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  .countdown-label {
+    font-family: var(--mono);
+    font-size: 12px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-top: 24px;
+  }
+
+  /* ── MOBILE BOTTOM NAV ── */
+  .mobile-nav {
+    display: none;
+    position: fixed;
+    bottom: 0;
+    left: 0; right: 0;
+    background: rgba(255,255,255,0.97);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-top: 1px solid var(--border);
+    padding: 0 8px;
+    padding-bottom: env(safe-area-inset-bottom);
+    height: calc(60px + env(safe-area-inset-bottom));
+    z-index: 200;
+    align-items: flex-start;
+    padding-top: 8px;
+    justify-content: space-around;
+  }
+
+  .mob-nav-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    padding: 8px 16px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--text-dim);
+    transition: color 0.2s;
+  }
+
+  .mob-nav-btn.active { color: var(--accent); }
+
+  .mob-nav-btn svg { width: 20px; height: 20px; }
+
+  .mob-nav-label {
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+
+  /* ── MOBILE DRAWER NAV ── */
+  .mobile-drawer {
+    display: none;
+    position: fixed;
+    top: calc(56px + env(safe-area-inset-top));
+    left: 0; right: 0; bottom: calc(60px + env(safe-area-inset-bottom));
+    background: var(--surface);
+    z-index: 150;
+    padding: 24px;
+    overflow-y: auto;
+    transform: translateX(-100%);
+    transition: transform 0.3s ease;
+  }
+
+  .mobile-drawer.open {
+    transform: translateX(0);
+  }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 900px) {
+    .app { grid-template-columns: 1fr; }
+    .sidebar { display: none; }
+    .topbar { display: flex; }
+    .mobile-nav { display: flex; }
+    .mobile-drawer { display: block; }
+
+    .section {
+      padding: 28px 20px;
+      padding-bottom: calc(100px + env(safe-area-inset-bottom));
+    }
+
+    .section-title { font-size: 30px; }
+    .ratio-grid { grid-template-columns: 1fr; }
+    .ratio-card { grid-column: auto; }
+    .result-card { grid-column: auto; }
+
+    .step-timer-wrap { flex-direction: column; align-items: flex-end; gap: 10px; }
+    .start-btn { padding: 8px 14px; }
+  }
+
+  /* ── POUR DIAGRAM (SVG) ── */
+  .pour-diagram {
+    margin: 32px 0;
+    display: flex;
+    align-items: center;
+    gap: 40px;
+    flex-wrap: wrap;
+  }
+
+  .pour-diagram-wrap {
+    flex-shrink: 0;
+  }
+
+  .pour-desc {
+    max-width: 300px;
+  }
+
+  .pour-desc h3 {
+    font-family: var(--serif);
+    font-size: 18px;
+    font-weight: 400;
+    color: var(--white);
+    margin-bottom: 8px;
+  }
+
+  .pour-desc p {
+    font-size: 14px;
+    font-weight: 300;
+    color: var(--text-muted);
+    line-height: 1.7;
+  }
+
+  /* ── MISC ── */
+  .divider {
+    height: 1px;
+    background: var(--border);
+    margin: 32px 0;
+  }
+
+  .tag {
+    display: inline-block;
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--accent);
+    border: 1px solid var(--accent2);
+    border-radius: 4px;
+    padding: 3px 8px;
+    margin-right: 8px;
+    margin-bottom: 4px;
+  }
+
+  .reset-btn {
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+    padding: 10px 24px;
+    border-radius: 8px;
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.2s;
+    margin-top: 24px;
+  }
+
+  .reset-btn:hover { border-color: var(--text-muted); color: var(--text); }
+
+  .info-box {
+    background: var(--surface);
+    border-left: 3px solid var(--accent2);
+    border-radius: 0 8px 8px 0;
+    padding: 16px 20px;
+    margin: 16px 0;
+  }
+
+  .info-box p {
+    font-size: 14px;
+    font-weight: 300;
+    color: var(--text-muted);
+    line-height: 1.7;
+  }
+
+  .gear-list {
+    list-style: none;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 12px;
+    margin-top: 16px;
+  }
+
+  .gear-item {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 20px;
+  }
+
+  .gear-item-icon {
+    margin-bottom: 12px;
+    color: var(--accent);
+  }
+
+  .gear-item-name {
+    font-family: var(--serif);
+    font-size: 16px;
+    font-weight: 400;
+    color: var(--white);
+    margin-bottom: 4px;
+  }
+
+  .gear-item-note {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--text-muted);
+    letter-spacing: 0.06em;
+  }
+
+  .go-brew-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--accent);
+    color: var(--bg);
+    border: none;
+    border-radius: 8px;
+    padding: 14px 28px;
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.2s;
+    margin-top: 32px;
+  }
+
+  .go-brew-btn:hover { background: var(--white); }
+
+  .step-card.locked { opacity: 0.4; pointer-events: none; }
+
+  /* ── BREW BAR ── */
+  .brew-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 32px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px 24px;
+    flex-wrap: wrap;
+  }
+
+  .brew-bar-left {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    flex-wrap: wrap;
+  }
+
+  .brew-bar-right {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .brew-total {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    color: var(--text-muted);
+    text-transform: uppercase;
+  }
+
+  .brew-total strong { color: var(--accent); font-weight: 400; }
+
+  .master-elapsed {
+    font-family: var(--mono);
+    font-size: 22px;
+    color: var(--white);
+    letter-spacing: 0.05em;
+    min-width: 48px;
+  }
+
+
+
+  .reset-btn-inline {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+    border-radius: 8px;
+    padding: 10px 16px;
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
+
+  .reset-btn-inline:hover { border-color: var(--text-muted); color: var(--text); }
+
+  /* timed steps have no visible button; manual step shows Done */
+
+
+  /* ── WAIT / REST STEP ── */
+  .step-card.wait-step .step-number {
+    background: rgba(74,122,58,0.10);
+    border-color: var(--green);
+    color: var(--green);
+  }
+
+  .step-card.wait-step.current {
+    border-color: var(--green);
+    box-shadow: 0 0 0 1px var(--green), inset 0 0 40px rgba(74,122,58,0.06);
+  }
+
+  .step-card.wait-step .step-timing {
+    color: var(--green);
+  }
+
+  .wait-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--green);
+    border: 1px solid var(--green);
+    border-radius: 4px;
+    padding: 2px 7px;
+    margin-bottom: 10px;
+    opacity: 0.8;
+  }
+
+  .step-card.wait-step .timer-progress {
+    stroke: var(--green) !important;
+  }
+
+
+  /* ── DRAIN HOLD BANNER ── */
+  .drain-hold {
+    display: none;
+    align-items: center;
+    gap: 12px;
+    margin-top: 14px;
+    background: #fffaf5;
+    border: 1px solid var(--accent2);
+    border-radius: 10px;
+    padding: 12px 18px;
+    animation: fadeSlideIn 0.3s ease;
+  }
+
+  .drain-hold.active { display: flex; }
+
+  @keyframes fadeSlideIn {
+    from { opacity: 0; transform: translateY(-6px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .drain-hold-icon {
+    width: 32px; height: 32px;
+    flex-shrink: 0;
+    color: var(--accent);
+    animation: drip 1.6s ease-in-out infinite;
+  }
+
+  @keyframes drip {
+    0%, 100% { transform: translateY(0); opacity: 1; }
+    50%       { transform: translateY(3px); opacity: 0.6; }
+  }
+
+  .drain-hold-text { flex: 1; }
+
+  .drain-hold-title {
+    font-family: var(--serif);
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--text);
+    margin-bottom: 2px;
+  }
+
+  .drain-hold-sub {
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+
+  .drain-hold-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--accent);
+    animation: pulse-dot 1.2s ease-in-out infinite;
+    flex-shrink: 0;
+  }
+
+
+  /* ── FLOATING BREW CONTROL ── */
+  .float-brew-bar {
+    display: none; /* shown only when brew section active + brew started */
+    position: fixed;
+    bottom: calc(68px + env(safe-area-inset-bottom));
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 300;
+    background: rgba(255,255,255,0.92);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid var(--border);
+    border-radius: 100px;
+    padding: 10px 10px 10px 20px;
+    display: none;
+    align-items: center;
+    gap: 14px;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.10), 0 1px 4px rgba(0,0,0,0.06);
+    min-width: 240px;
+    max-width: calc(100vw - 40px);
+    animation: floatUp 0.3s cubic-bezier(0.34,1.4,0.64,1);
+  }
+
+  @keyframes floatUp {
+    from { opacity: 0; transform: translateX(-50%) translateY(12px); }
+    to   { opacity: 1; transform: translateX(-50%) translateY(0); }
+  }
+
+  .float-brew-bar.visible { display: flex; }
+
+  .float-step-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.13em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    flex: 1;
+  }
+
+  .float-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--accent);
+    color: #fff;
+    border: 1.5px solid transparent;
+    border-radius: 100px;
+    padding: 11px 20px;
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.18s;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  .float-btn:active { transform: scale(0.95); }
+
+  .float-btn.paused {
+    background: transparent;
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+
+  .float-btn.done-state {
+    background: var(--green);
+    border-color: transparent;
+  }
+
+  .float-btn:disabled { opacity: 0.45; cursor: default; }
+
+  /* On desktop sidebar layout — float bar aligns to main content area */
+  @media (min-width: 901px) {
+    .float-brew-bar {
+      bottom: 32px;
+      left: calc(280px + 50% - 140px);
+      transform: none;
+    }
+  }
+
+
+  /* ── CARD START BUTTON ── */
+  .card-start-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    width: 100%;
+    margin-top: 24px;
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    border-radius: 12px;
+    padding: 16px 24px;
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.18s;
+    box-shadow: 0 2px 10px rgba(156,106,58,0.22);
+  }
+
+  .card-start-btn:active { transform: scale(0.98); opacity: 0.9; }
+
+
+  /* ── COMPLETION OVERLAY ── */
+  .brew-complete {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 500;
+    background: var(--bg);
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    animation: fadeIn 0.4s ease;
+  }
+
+  .brew-complete.active { display: block; }
+
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+  }
+
+  .complete-inner {
+    min-height: 100%;
+    display: flex;
+    flex-direction: column;
+    padding: env(safe-area-inset-top) 0 env(safe-area-inset-bottom) 0;
+  }
+
+  /* ── Top hero ── */
+  .complete-hero {
+    padding: 48px 32px 40px;
+    text-align: center;
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+  }
+
+  .complete-cup {
+    width: 72px;
+    height: 72px;
+    margin: 0 auto 28px;
+    color: var(--accent);
+    animation: riseUp 0.6s cubic-bezier(0.34,1.4,0.64,1) 0.2s both;
+  }
+
+  @keyframes riseUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .complete-eyebrow {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 10px;
+    animation: riseUp 0.5s ease 0.3s both;
+  }
+
+  .complete-title {
+    font-family: var(--serif);
+    font-size: 38px;
+    font-weight: 300;
+    color: var(--text);
+    line-height: 1.15;
+    letter-spacing: 0.01em;
+    margin-bottom: 8px;
+    animation: riseUp 0.5s ease 0.35s both;
+  }
+
+  .complete-sub {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.13em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    animation: riseUp 0.5s ease 0.4s both;
+  }
+
+  /* brew stats row */
+  .complete-stats {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0;
+    margin-top: 28px;
+    animation: riseUp 0.5s ease 0.45s both;
+  }
+
+  .complete-stat {
+    text-align: center;
+    padding: 0 24px;
+    border-right: 1px solid var(--border);
+  }
+
+  .complete-stat:last-child { border-right: none; }
+
+  .complete-stat-val {
+    font-family: var(--mono);
+    font-size: 20px;
+    color: var(--text);
+    letter-spacing: -0.01em;
+  }
+
+  .complete-stat-key {
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-top: 3px;
+  }
+
+  /* ── Serve cards ── */
+  .complete-serves {
+    padding: 32px 24px;
+    flex: 1;
+  }
+
+  .complete-serves-title {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 20px;
+    padding: 0 8px;
+    animation: riseUp 0.5s ease 0.5s both;
+  }
+
+  .serve-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+
+  @media (min-width: 600px) {
+    .serve-grid { grid-template-columns: repeat(3, 1fr); }
+  }
+
+  .serve-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 20px 16px 18px;
+    cursor: default;
+    animation: riseUp 0.5s ease both;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+
+  .serve-card:nth-child(1) { animation-delay: 0.52s; }
+  .serve-card:nth-child(2) { animation-delay: 0.56s; }
+  .serve-card:nth-child(3) { animation-delay: 0.60s; }
+  .serve-card:nth-child(4) { animation-delay: 0.64s; }
+  .serve-card:nth-child(5) { animation-delay: 0.68s; }
+  .serve-card:nth-child(6) { animation-delay: 0.72s; }
+
+  .serve-card:hover {
+    border-color: var(--accent2);
+    box-shadow: 0 2px 12px rgba(156,106,58,0.08);
+  }
+
+  .serve-icon {
+    color: var(--accent);
+    margin-bottom: 12px;
+  }
+
+  .serve-name {
+    font-family: var(--serif);
+    font-size: 16px;
+    font-weight: 500;
+    color: var(--text);
+    margin-bottom: 5px;
+    line-height: 1.2;
+  }
+
+  .serve-desc {
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: 0.08em;
+    color: var(--text-muted);
+    line-height: 1.6;
+    text-transform: uppercase;
+  }
+
+  .serve-tag {
+    display: inline-block;
+    margin-top: 10px;
+    font-family: var(--mono);
+    font-size: 8px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--accent);
+    border: 1px solid var(--accent2);
+    border-radius: 100px;
+    padding: 2px 8px;
+  }
+
+  /* ── Bottom close ── */
+  .complete-footer {
+    padding: 16px 24px calc(24px + env(safe-area-inset-bottom));
+    border-top: 1px solid var(--border);
+    flex-shrink: 0;
+    display: flex;
+    gap: 10px;
+  }
+
+  .complete-close-btn {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    background: none;
+    border: 1.5px solid var(--border);
+    border-radius: 100px;
+    padding: 13px 20px;
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: all 0.18s;
+  }
+
+  .complete-close-btn:active { transform: scale(0.97); }
+  .complete-close-btn:hover { border-color: var(--text-muted); color: var(--text); }
+
+  .complete-again-btn {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    border-radius: 100px;
+    padding: 13px 20px;
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.18s;
+    box-shadow: 0 2px 10px rgba(156,106,58,0.22);
+  }
+
+  .complete-again-btn:active { transform: scale(0.97); }
+
+</style>
+</head>
+<body>
+
+<!-- ── COUNTDOWN OVERLAY ── -->
+<div class="countdown-overlay" id="countdownOverlay">
+  <div class="countdown-number" id="countdownNum">3</div>
+  <div class="countdown-label" id="countdownLabel">Starting in</div>
+</div>
+
+<!-- ── APP SHELL ── -->
+<div class="app">
+
+  <!-- SIDEBAR (DESKTOP) -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <svg class="logo-mark" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <!-- V60 dripper body -->
+        <path d="M10 14 L24 40 L38 14" stroke="var(--accent)" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+        <!-- rim -->
+        <path d="M7 14 L41 14" stroke="var(--accent)" stroke-width="2" stroke-linecap="round"/>
+        <!-- opening ellipse -->
+        <ellipse cx="24" cy="14" rx="8" ry="2.5" stroke="var(--accent)" stroke-width="2" fill="none"/>
+        <!-- spiral rib lines inside dripper -->
+        <path d="M17 20 Q24 22 31 20" stroke="var(--accent)" stroke-width="1" fill="none" stroke-linecap="round" opacity="0.5"/>
+        <path d="M14 26 Q24 29 34 26" stroke="var(--accent)" stroke-width="1" fill="none" stroke-linecap="round" opacity="0.4"/>
+        <!-- drip stem -->
+        <line x1="24" y1="40" x2="24" y2="46" stroke="var(--accent)" stroke-width="2" stroke-linecap="round"/>
+        <!-- base -->
+        <line x1="18" y1="46" x2="30" y2="46" stroke="var(--accent)" stroke-width="2" stroke-linecap="round"/>
+      </svg>
+      <div class="logo-title">Pour Over<br>Guide</div>
+      <div class="logo-sub">V60 Method</div>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-section">
+        <div class="nav-label">Setup</div>
+        <button class="nav-item active" onclick="showSection('ratio')">
+          <div class="nav-dot"></div> Ratio Calculator
+        </button>
+        <button class="nav-item" onclick="showSection('gear')">
+          <div class="nav-dot"></div> Equipment
+        </button>
+      </div>
+      <div class="nav-section">
+        <div class="nav-label">Brew</div>
+        <button class="nav-item" onclick="showSection('steps')">
+          <div class="nav-dot"></div> Brew Steps
+        </button>
+      </div>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="sidebar-footer-text">HARIO V60 &middot; DRIP METHOD</div>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main">
+
+    <!-- TOPBAR (MOBILE) -->
+    <div class="topbar">
+      <div style="display:flex;align-items:center;gap:10px;">
+        <svg width="28" height="28" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M10 14 L24 40 L38 14" stroke="var(--accent)" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M7 14 L41 14" stroke="var(--accent)" stroke-width="2.5" stroke-linecap="round"/>
+          <ellipse cx="24" cy="14" rx="8" ry="2.5" stroke="var(--accent)" stroke-width="2.5" fill="none"/>
+          <path d="M17 20 Q24 22 31 20" stroke="var(--accent)" stroke-width="1.2" fill="none" stroke-linecap="round" opacity="0.5"/>
+          <line x1="24" y1="40" x2="24" y2="46" stroke="var(--accent)" stroke-width="2.5" stroke-linecap="round"/>
+          <line x1="18" y1="46" x2="30" y2="46" stroke="var(--accent)" stroke-width="2.5" stroke-linecap="round"/>
+        </svg>
+        <div class="topbar-title">V60 Guide</div>
+      </div>
+      <button class="topbar-menu-btn" onclick="toggleDrawer()">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><line x1="1" y1="3" x2="13" y2="3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><line x1="1" y1="7" x2="13" y2="7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><line x1="1" y1="11" x2="13" y2="11" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        Menu
+      </button>
+    </div>
+
+    <!-- MOBILE DRAWER -->
+    <div class="mobile-drawer" id="mobileDrawer">
+      <div class="nav-section">
+        <div class="nav-label">Setup</div>
+        <button class="nav-item active" onclick="showSection('ratio');closeDrawer()"><div class="nav-dot"></div> Ratio Calculator</button>
+        <button class="nav-item" onclick="showSection('gear');closeDrawer()"><div class="nav-dot"></div> Equipment</button>
+      </div>
+      <div class="nav-section">
+        <div class="nav-label">Brew</div>
+        <button class="nav-item" onclick="showSection('steps');closeDrawer()"><div class="nav-dot"></div> Brew Steps</button>
+      </div>
+    </div>
+
+    <!-- ── SECTION: RATIO ── -->
+    <section class="section active" id="section-ratio">
+      <div class="section-header">
+        <div class="section-eyebrow">Step 1 of 3</div>
+        <div class="section-title">Ratio<br>Calculator</div>
+        <p class="section-desc">Select your preferred brew ratio, then enter either your coffee or water amount. The other value calculates automatically.</p>
+      </div>
+
+      <div class="ratio-grid">
+        <div class="ratio-card">
+          <div class="ratio-label-row">Brew Ratio (Coffee : Water)</div>
+          <div class="ratio-buttons">
+            <button class="ratio-btn" data-ratio="14" onclick="setRatio(14, this)">1 : 14</button>
+            <button class="ratio-btn active" data-ratio="15" onclick="setRatio(15, this)">1 : 15</button>
+            <button class="ratio-btn" data-ratio="16" onclick="setRatio(16, this)">1 : 16</button>
+            <button class="ratio-btn" data-ratio="17" onclick="setRatio(17, this)">1 : 17</button>
+          </div>
+        </div>
+
+        <div class="input-card">
+          <div class="input-label">Coffee</div>
+          <div class="input-wrap">
+            <input class="calc-input" id="coffeeInput" type="number" min="1" max="100" placeholder="15" oninput="calcFromCoffee()" />
+            <div class="input-unit">g</div>
+          </div>
+        </div>
+
+        <div class="input-card">
+          <div class="input-label">Water</div>
+          <div class="input-wrap">
+            <input class="calc-input" id="waterInput" type="number" min="1" max="2000" placeholder="250" oninput="calcFromWater()" />
+            <div class="input-unit">ml</div>
+          </div>
+        </div>
+
+        <div class="result-card">
+          <div class="result-row">
+            <div class="result-key">Coffee Grounds</div>
+            <div class="result-val" id="resCoffee">15<span>g</span></div>
+          </div>
+          <div class="result-row">
+            <div class="result-key">Total Water</div>
+            <div class="result-val" id="resWater">225<span>ml</span></div>
+          </div>
+          <div class="result-row">
+            <div class="result-key">Bloom Water (2.5x coffee)</div>
+            <div class="result-val" id="resBloom">38<span>ml</span></div>
+          </div>
+          <div class="result-row">
+            <div class="result-key">Target Brew Time</div>
+            <div class="result-val" id="resTime">2:30 – 3:00<span>min</span></div>
+          </div>
+        </div>
+      </div>
+
+      <button class="go-brew-btn" onclick="showSection('steps')">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M3 7h8M8 4l3 3-3 3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Start Brewing
+      </button>
+    </section>
+
+    <!-- ── SECTION: GEAR ── -->
+    <section class="section" id="section-gear">
+      <div class="section-header">
+        <div class="section-eyebrow">Equipment</div>
+        <div class="section-title">What You<br>Need</div>
+        <p class="section-desc">Minimal setup, maximum control. The V60 rewards precision and attention.</p>
+      </div>
+
+      <ul class="gear-list">
+        <li class="gear-item">
+          <div class="gear-item-icon">
+            <svg width="28" height="28" viewBox="0 0 28 28" fill="none"><path d="M6 8 L14 22 L22 8" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/><line x1="4" y1="8" x2="24" y2="8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+          </div>
+          <div class="gear-item-name">Hario V60</div>
+          <div class="gear-item-note">Size 01 or 02</div>
+        </li>
+        <li class="gear-item">
+          <div class="gear-item-icon">
+            <svg width="28" height="28" viewBox="0 0 28 28" fill="none"><path d="M8 6 Q8 14 14 20 Q20 14 20 6" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round"/><line x1="8" y1="6" x2="20" y2="6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+          </div>
+          <div class="gear-item-name">Paper Filter</div>
+          <div class="gear-item-note">Rinse before use</div>
+        </li>
+        <li class="gear-item">
+          <div class="gear-item-icon">
+            <svg width="28" height="28" viewBox="0 0 28 28" fill="none"><circle cx="14" cy="14" r="8" stroke="currentColor" stroke-width="1.5" fill="none"/><line x1="14" y1="10" x2="14" y2="14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><line x1="14" y1="14" x2="17" y2="17" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+          </div>
+          <div class="gear-item-name">Timer</div>
+          <div class="gear-item-note">Precision matters</div>
+        </li>
+        <li class="gear-item">
+          <div class="gear-item-icon">
+            <svg width="28" height="28" viewBox="0 0 28 28" fill="none"><rect x="8" y="16" width="12" height="6" rx="2" stroke="currentColor" stroke-width="1.5" fill="none"/><line x1="14" y1="16" x2="14" y2="10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><path d="M11 12 L14 10 L17 12" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <div class="gear-item-name">Gooseneck Kettle</div>
+          <div class="gear-item-note">92 – 96 °C water</div>
+        </li>
+        <li class="gear-item">
+          <div class="gear-item-icon">
+            <svg width="28" height="28" viewBox="0 0 28 28" fill="none"><rect x="8" y="10" width="12" height="12" rx="2" stroke="currentColor" stroke-width="1.5" fill="none"/><line x1="11" y1="10" x2="11" y2="7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><line x1="17" y1="10" x2="17" y2="7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+          </div>
+          <div class="gear-item-name">Scale</div>
+          <div class="gear-item-note">0.1g resolution</div>
+        </li>
+        <li class="gear-item">
+          <div class="gear-item-icon">
+            <svg width="28" height="28" viewBox="0 0 28 28" fill="none"><ellipse cx="14" cy="20" rx="8" ry="3" stroke="currentColor" stroke-width="1.5" fill="none"/><path d="M6 20 L6 10 Q14 6 22 10 L22 20" stroke="currentColor" stroke-width="1.5" fill="none"/></svg>
+          </div>
+          <div class="gear-item-name">Server / Mug</div>
+          <div class="gear-item-note">Pre-heat recommended</div>
+        </li>
+      </ul>
+
+      <div class="info-box" style="margin-top:32px">
+        <p>Grind fresh for best results. Medium-fine grind — similar texture to coarse sand. Adjust coarser if brew drains too fast, finer if too slow.</p>
+      </div>
+
+      <button class="go-brew-btn" onclick="showSection('steps')">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M3 7h8M8 4l3 3-3 3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Start Brewing
+      </button>
+    </section>
+
+    <!-- ── SECTION: STEPS ── -->
+    <section class="section" id="section-steps">
+      <div class="section-header">
+        <div class="section-eyebrow">Brew Guide</div>
+        <div class="section-title">V60<br>Pour Over</div>
+        <p class="section-desc">Complete the rinse step, then hit Start Brew. All timed steps run back-to-back automatically. Pause at any time.</p>
+      </div>
+
+      <div class="brew-bar">
+        <div class="brew-bar-meta">
+          <div class="brew-total">Recipe: <strong id="stepsRecipeLabel">15g / 225ml</strong></div>
+          <button class="brew-reset-link" onclick="resetBrew()" id="resetLink" style="display:none">Reset</button>
+        </div>
+        <div class="brew-bar-main">
+          <div class="master-elapsed" id="masterElapsed">0:00</div>
+          <!-- Master btn hidden until brew starts; step-0 card has the combined Done+Start -->
+          <button class="master-btn" id="masterBtn" onclick="handleMaster()" style="display:none">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none" id="masterIcon"><path d="M3 2.5L11 7L3 11.5V2.5Z" fill="currentColor"/></svg>
+            <span id="masterBtnLabel">Start Brew</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Drain hold banner -->
+      <div class="drain-hold" id="drainHold">
+        <svg class="drain-hold-icon" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <!-- dripper outline -->
+          <path d="M7 10 L16 26 L25 10" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+          <line x1="5" y1="10" x2="27" y2="10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+          <!-- drip drop -->
+          <path d="M16 28 Q14.5 30.5 16 31.5 Q17.5 30.5 16 28Z" fill="currentColor" opacity="0.7"/>
+        </svg>
+        <div class="drain-hold-text">
+          <div class="drain-hold-title">Waiting for filter to drain</div>
+          <div class="drain-hold-sub">Resume when cup has space</div>
+        </div>
+        <div class="drain-hold-dot"></div>
+      </div>
+
+      <div class="steps-container" id="stepsContainer">
+        <!-- Steps injected by JS -->
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<!-- ── MOBILE BOTTOM NAV ── -->
+<nav class="mobile-nav">
+  <button class="mob-nav-btn active" id="mobnav-ratio" onclick="showSection('ratio')">
+    <svg viewBox="0 0 20 20" fill="none"><circle cx="7" cy="7" r="3" stroke="currentColor" stroke-width="1.4"/><circle cx="13" cy="13" r="3" stroke="currentColor" stroke-width="1.4"/><line x1="3" y1="17" x2="17" y2="3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+    <div class="mob-nav-label">Ratio</div>
+  </button>
+  <button class="mob-nav-btn" id="mobnav-gear" onclick="showSection('gear')">
+    <svg viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="3" stroke="currentColor" stroke-width="1.4"/><path d="M10 2v2M10 16v2M2 10h2M16 10h2M4.1 4.1l1.4 1.4M14.5 14.5l1.4 1.4M14.5 5.5l-1.4 1.4M5.5 14.5l-1.4 1.4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+    <div class="mob-nav-label">Gear</div>
+  </button>
+  <button class="mob-nav-btn" id="mobnav-steps" onclick="showSection('steps')">
+    <svg viewBox="0 0 20 20" fill="none"><path d="M3 5h14M3 10h14M3 15h8" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+    <div class="mob-nav-label">Brew</div>
+  </button>
+</nav>
+
+<script>
+// ─────────────────────────────────────────────
+//  STATE
+// ─────────────────────────────────────────────
+let currentRatio = 15;
+let coffeeG = 15;
+let waterMl = 225;
+let stepTimers = {};
+
+// Master brew clock state
+let brewRunning = false;
+let brewPaused = false;
+let brewStarted = false;   // has countdown fired at least once
+let masterRafId = null;
+let masterElapsedMs = 0;
+let masterLastTimestamp = null;
+
+// Sequence of timed steps (indices into getSteps() that have duration > 0, after manual step done)
+let timedQueue = [];   // array of step indices to run in order
+let timedQueuePos = 0; // which one is currently active
+let stepStartMs = 0;   // masterElapsedMs when current timed step began
+let brewFinished = false;
+
+// ─────────────────────────────────────────────
+//  BREW STEPS DEFINITION
+// ─────────────────────────────────────────────
+function getSteps(coffee, water) {
+  const bloom = Math.round(coffee * 2.5);
+  const pour1 = Math.round(water * 0.55);
+  const pour2 = water;
+
+  return [
+    {
+      title: 'Rinse & Preheat',
+      timing: 'Before brew',
+      duration: 0,
+      isManual: true,
+      isWait: false,
+      instructions: [
+        'Place paper filter in V60, set over server.',
+        'Rinse filter with hot water to remove paper taste.',
+        'Discard rinse water, add ' + coffee + 'g freshly ground coffee.',
+        'Level the grounds gently.',
+      ],
+      note: 'Rinsing also preheats your server and V60.',
+      waterTarget: null,
+      waterFrom: 0, waterTo: 0,
+    },
+    {
+      title: 'Bloom — Pour',
+      timing: '0:00 – 0:15',
+      duration: 15,
+      isManual: false,
+      isWait: false,
+      instructions: [
+        'Pour ' + bloom + 'ml water — about 2.5× coffee weight.',
+        'Wet all grounds evenly from center outward.',
+      ],
+      note: 'Pour in a slow spiral from center outward.',
+      waterTarget: { current: bloom, total: water },
+      waterFrom: 0, waterTo: bloom,
+    },
+    {
+      title: 'Bloom — Rest',
+      timing: '0:15 – 0:45',
+      duration: 30,
+      isManual: false,
+      isWait: true,
+      instructions: [
+        'Stop pouring. Set kettle down.',
+        'Watch the grounds bubble and swell.',
+        'Wait for CO2 to release fully.',
+      ],
+      note: 'Longer bloom = more CO2 released = more even extraction.',
+      waterTarget: null,
+      waterFrom: bloom, waterTo: bloom,
+    },
+    {
+      title: 'Main Pour — 1',
+      timing: '0:45 – 1:15',
+      duration: 30,
+      isManual: false,
+      isWait: false,
+      instructions: [
+        'Pour slowly in small circles from center outward.',
+        'Bring total water to ' + pour1 + 'ml.',
+        'Keep the stream steady and gentle.',
+      ],
+      note: 'Avoid pouring directly on the filter wall.',
+      waterTarget: { current: pour1, total: water },
+      waterFrom: bloom, waterTo: pour1,
+    },
+    {
+      title: 'Rest — 1',
+      timing: '1:15 – 1:30',
+      duration: 15,
+      isManual: false,
+      isWait: true,
+      instructions: [
+        'Stop pouring. Let water settle.',
+        'Allow bed to drain slightly before next pour.',
+      ],
+      note: 'Brief pause improves even saturation.',
+      waterTarget: null,
+      waterFrom: pour1, waterTo: pour1,
+    },
+    {
+      title: 'Main Pour — 2',
+      timing: '1:30 – 2:00',
+      duration: 30,
+      isManual: false,
+      isWait: false,
+      instructions: [
+        'Continue pouring in slow circles.',
+        'Bring total water to ' + pour2 + 'ml.',
+      ],
+      note: 'Avoid pouring directly on the filter paper.',
+      waterTarget: { current: pour2, total: water },
+      waterFrom: pour1, waterTo: pour2,
+    },
+    {
+      title: 'Draw Down',
+      timing: '2:00 – 3:00+',
+      duration: 90,
+      isManual: false,
+      isWait: true,
+      instructions: [
+        'Give the dripper a gentle swirl.',
+        'Let the water draw down completely.',
+        'Remove dripper when bed is dry.',
+      ],
+      note: 'Target total brew time: 2:30 – 3:00 min.',
+      waterTarget: null,
+      waterFrom: 0, waterTo: 0,
+    },
+  ];
+}
+
+// ─────────────────────────────────────────────
+//  RATIO / CALC
+// ─────────────────────────────────────────────
+function setRatio(r, el) {
+  currentRatio = r;
+  document.querySelectorAll('.ratio-btn').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+  const ci = document.getElementById('coffeeInput');
+  if (ci.value) calcFromCoffee();
+  else calcFromWater();
+  savePrefs();
+}
+
+function calcFromCoffee() {
+  const v = parseFloat(document.getElementById('coffeeInput').value);
+  if (!v || v <= 0) return;
+  coffeeG = v;
+  waterMl = Math.round(v * currentRatio);
+  document.getElementById('waterInput').value = waterMl;
+  updateResults();
+  savePrefs();
+}
+
+function calcFromWater() {
+  const v = parseFloat(document.getElementById('waterInput').value);
+  if (!v || v <= 0) return;
+  waterMl = v;
+  coffeeG = parseFloat((v / currentRatio).toFixed(1));
+  document.getElementById('coffeeInput').value = coffeeG;
+  updateResults();
+  savePrefs();
+}
+
+function updateResults() {
+  document.getElementById('resCoffee').innerHTML = coffeeG + '<span>g</span>';
+  document.getElementById('resWater').innerHTML = waterMl + '<span>ml</span>';
+  document.getElementById('resBloom').innerHTML = Math.round(coffeeG * 2.5) + '<span>ml</span>';
+  const t = coffeeG <= 15 ? '2:30 – 3:00' : '2:30 – 3:30';
+  document.getElementById('resTime').innerHTML = t + '<span>min</span>';
+}
+
+// ─────────────────────────────────────────────
+//  NAV
+// ─────────────────────────────────────────────
+function showSection(name) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.querySelectorAll('.mob-nav-btn').forEach(n => n.classList.remove('active'));
+
+  document.getElementById('section-' + name).classList.add('active');
+
+  // Float bar only relevant on steps section
+  const fbar = document.getElementById('floatBrewBar');
+  if (fbar) {
+    if (name === 'steps' && (brewRunning || brewPaused || brewFinished)) {
+      fbar.classList.add('visible');
+    } else if (name !== 'steps') {
+      fbar.classList.remove('visible');
+    }
+  }
+
+  document.querySelectorAll('.nav-item').forEach(n => {
+    if (n.textContent.trim().toLowerCase().includes(
+      name === 'ratio' ? 'ratio' : name === 'gear' ? 'equip' : 'brew')) {
+      n.classList.add('active');
+    }
+  });
+
+  const mnb = document.getElementById('mobnav-' + name);
+  if (mnb) mnb.classList.add('active');
+
+  if (name === 'steps') renderSteps();
+}
+
+function toggleDrawer() {
+  document.getElementById('mobileDrawer').classList.toggle('open');
+}
+
+function closeDrawer() {
+  document.getElementById('mobileDrawer').classList.remove('open');
+}
+
+// ─────────────────────────────────────────────
+//  STEPS RENDER
+// ─────────────────────────────────────────────
+function renderSteps() {
+  const steps = getSteps(coffeeG, waterMl);
+  document.getElementById('stepsRecipeLabel').textContent =
+    coffeeG + 'g / ' + waterMl + 'ml';
+
+  const container = document.getElementById('stepsContainer');
+  container.innerHTML = '';
+
+  steps.forEach((step, i) => {
+    const card = document.createElement('div');
+    card.className = 'step-card' + (i === 0 ? ' current' : ' locked') + (step.isManual ? ' manual-step' : '') + (step.isWait ? ' wait-step' : '');
+    card.id = 'step-card-' + i;
+
+    const circum = 2 * Math.PI * 30;
+
+    let waterBarHtml = '';
+    if (step.waterTarget) {
+      const pct = Math.round((step.waterTarget.current / step.waterTarget.total) * 100);
+      waterBarHtml = `
+        <div class="step-water-bar">
+          <div class="water-label">
+            <span>Target at end of step</span>
+            <span>${step.waterTarget.current}ml / ${step.waterTarget.total}ml total</span>
+          </div>
+          <div class="water-track"><div class="water-fill" style="width:${pct}%"></div></div>
+        </div>`;
+    }
+
+    let pourEstHtml = '';
+    if (step.waterTo > step.waterFrom) {
+      pourEstHtml = `
+        <div class="pour-estimator" id="pest-${i}">
+          <div class="pour-est-header">
+            <div class="pour-est-label">
+              <div class="pour-est-dot"></div>
+              Pour now
+            </div>
+            <div class="pour-est-now" id="pest-val-${i}">${step.waterFrom}<span>ml</span></div>
+          </div>
+          <div class="pour-est-bar-wrap">
+            <div class="pour-est-bar-labels">
+              <span>${step.waterFrom}ml start</span>
+              <span>${step.waterTo}ml target</span>
+            </div>
+            <div class="pour-est-track">
+              <div class="pour-est-fill" id="pest-fill-${i}" style="width:0%"></div>
+            </div>
+          </div>
+          <div class="pour-est-range">Pour this step &nbsp;<strong>+${step.waterTo - step.waterFrom}ml</strong></div>
+        </div>`;
+    }
+
+    const instructionsHtml = step.instructions.map((ins, j) =>
+      `<li><span class="li-num">0${j+1}</span><span>${ins}</span></li>`
+    ).join('');
+
+    const timerHtml = step.duration > 0 ? `
+      <div class="step-timer-wrap">
+        <div class="timer-ring" id="ring-${i}">
+          <svg><circle class="timer-bg" cx="36" cy="36" r="30"/><circle class="timer-progress" id="prog-${i}" cx="36" cy="36" r="30" stroke-dasharray="${circum}" stroke-dashoffset="0"/></svg>
+          <div class="timer-countdown" id="tc-${i}">${step.duration}s</div>
+        </div>
+        
+      </div>` : `
+      <div style="display:none" id="btn-wrap-${i}"></div>`;
+
+    const waitBadge = step.isWait ? '<div class="wait-badge"><svg width="9" height="9" viewBox="0 0 9 9" fill="none"><circle cx="4.5" cy="4.5" r="3.5" stroke="currentColor" stroke-width="1"/><line x1="4.5" y1="2.5" x2="4.5" y2="4.5" stroke="currentColor" stroke-width="1" stroke-linecap="round"/><line x1="4.5" y1="4.5" x2="6" y2="5.5" stroke="currentColor" stroke-width="1" stroke-linecap="round"/></svg> Wait</div>' : '';
+
+    card.innerHTML = `
+      <div class="step-top">
+        <div class="step-number">${String(i+1).padStart(2,'0')}</div>
+        <div class="step-info">
+          ${waitBadge}
+          <div class="step-title">${step.title}</div>
+          <div class="step-timing">${step.timing}</div>
+        </div>
+        ${timerHtml}
+      </div>
+      <ul class="step-instructions">${instructionsHtml}</ul>
+      <div class="step-note">${step.note}</div>
+      ${waterBarHtml}
+      ${pourEstHtml}
+      ${step.isManual ? `
+        <button class="card-start-btn" id="btn-${i}" onclick="manualDone(${i})">
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M3 2.5L11 7L3 11.5V2.5Z" fill="currentColor"/></svg>
+          Done &mdash; Start Brew
+        </button>` : ''}
+    `;
+
+    container.appendChild(card);
+  });
+}
+
+// ─────────────────────────────────────────────
+//  MASTER BREW CONTROL
+// ─────────────────────────────────────────────
+function handleMaster() {
+  if (!brewStarted && !brewFinished) {
+    startCountdown();
+  } else if (brewFinished) {
+    resetBrew();
+  } else if (brewRunning) {
+    pauseBrew();
+  } else if (brewPaused) {
+    resumeBrew();
+  }
+}
+
+function startCountdown() {
+  const overlay = document.getElementById('countdownOverlay');
+  const num = document.getElementById('countdownNum');
+  const lbl = document.getElementById('countdownLabel');
+
+  overlay.classList.add('active');
+  lbl.textContent = 'Brew starting';
+
+  let count = 3;
+  const flash = () => {
+    num.classList.remove('show');
+    setTimeout(() => { num.textContent = count; num.classList.add('show'); }, 50);
+  };
+  flash();
+
+  const iv = setInterval(() => {
+    count--;
+    if (count <= 0) {
+      clearInterval(iv);
+      num.classList.remove('show');
+      setTimeout(() => {
+        overlay.classList.remove('active');
+        startMasterClock();
+      }, 300);
+    } else {
+      flash();
+    }
+  }, 1000);
+}
+
+function startMasterClock() {
+  const steps = getSteps(coffeeG, waterMl);
+  // Build queue of timed step indices (skip manual step 0)
+  timedQueue = steps.map((s, i) => i).filter(i => steps[i].duration > 0);
+  timedQueuePos = 0;
+  masterElapsedMs = 0;
+  masterLastTimestamp = null;
+  brewStarted = true;
+  brewRunning = true;
+  brewPaused = false;
+  stepStartMs = 0;
+
+  setMasterBtnState('running');
+  activateTimedStep(timedQueue[0]);
+  masterRafId = requestAnimationFrame(masterTick);
+}
+
+function pauseBrew() {
+  brewRunning = false;
+  brewPaused = true;
+  cancelAnimationFrame(masterRafId);
+  masterLastTimestamp = null;
+
+  // Show drain banner only on active pour steps
+  const steps = getSteps(coffeeG, waterMl);
+  const stepIdx = timedQueue[timedQueuePos];
+  const step = steps[stepIdx];
+  const drainHold = document.getElementById('drainHold');
+  if (drainHold && step && !step.isWait) {
+    drainHold.classList.add('active');
+  }
+
+  setMasterBtnState('paused');
+}
+
+function resumeBrew() {
+  brewRunning = true;
+  brewPaused = false;
+  const drainHold = document.getElementById('drainHold');
+  if (drainHold) drainHold.classList.remove('active');
+  setMasterBtnState('running');
+  masterRafId = requestAnimationFrame(masterTick);
+}
+
+function masterTick(now) {
+  if (!brewRunning) return;
+
+  if (masterLastTimestamp !== null) {
+    masterElapsedMs += now - masterLastTimestamp;
+  }
+  masterLastTimestamp = now;
+
+  // Update master elapsed display
+  const totalSec = Math.floor(masterElapsedMs / 1000);
+  const mm = Math.floor(totalSec / 60);
+  const ss = String(totalSec % 60).padStart(2, '0');
+  const drainHold = document.getElementById('drainHold');
+  if (drainHold) drainHold.classList.remove('active');
+  const el = document.getElementById('masterElapsed');
+  if (el) el.textContent = mm + ':' + ss;
+
+  // Current timed step
+  const steps = getSteps(coffeeG, waterMl);
+  const stepIdx = timedQueue[timedQueuePos];
+  const step = steps[stepIdx];
+  const stepElapsedMs = masterElapsedMs - stepStartMs;
+  const durationMs = step.duration * 1000;
+  const progress = Math.min(stepElapsedMs / durationMs, 1);
+
+  // Update timer ring
+  const circum = 2 * Math.PI * 30;
+  const prog = document.getElementById('prog-' + stepIdx);
+  const tc = document.getElementById('tc-' + stepIdx);
+  if (prog) prog.style.strokeDashoffset = circum * progress;
+  const remainSec = Math.max(0, Math.ceil((durationMs - stepElapsedMs) / 1000));
+  if (tc) tc.textContent = remainSec + 's';
+
+  // Pour estimator
+  const hasPour = step.waterTo > step.waterFrom;
+  if (hasPour) {
+    const poured = step.waterFrom + (step.waterTo - step.waterFrom) * progress;
+    const pourPct = ((poured - step.waterFrom) / (step.waterTo - step.waterFrom)) * 100;
+    const pestVal = document.getElementById('pest-val-' + stepIdx);
+    const pestFill = document.getElementById('pest-fill-' + stepIdx);
+    if (pestVal) pestVal.innerHTML = Math.round(poured) + '<span>ml</span>';
+    if (pestFill) pestFill.style.width = Math.min(pourPct, 100) + '%';
+  }
+
+  if (progress >= 1) {
+    finishTimedStep(stepIdx);
+    return;
+  }
+
+  masterRafId = requestAnimationFrame(masterTick);
+}
+
+function activateTimedStep(stepIdx) {
+  const steps = getSteps(coffeeG, waterMl);
+  const step = steps[stepIdx];
+
+  const card = document.getElementById('step-card-' + stepIdx);
+  if (card) {
+    card.classList.remove('locked', 'done');
+    card.classList.add('current');
+    card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+
+  // Set ring color for wait vs pour
+  const prog = document.getElementById('prog-' + stepIdx);
+  if (prog) prog.style.stroke = step.isWait ? 'var(--green)' : 'var(--accent)';
+
+  // Show pour estimator
+  const pest = document.getElementById('pest-' + stepIdx);
+  if (pest && step.waterTo > step.waterFrom) pest.classList.add('active');
+}
+
+function finishTimedStep(stepIdx) {
+  const steps = getSteps(coffeeG, waterMl);
+  const step = steps[stepIdx];
+
+  // Lock in visuals
+  const card = document.getElementById('step-card-' + stepIdx);
+  if (card) { card.classList.remove('current'); card.classList.add('done'); }
+
+  const prog = document.getElementById('prog-' + stepIdx);
+  const circum = 2 * Math.PI * 30;
+  if (prog) { prog.style.strokeDashoffset = circum; prog.style.stroke = 'var(--green)'; }
+
+  const tc = document.getElementById('tc-' + stepIdx);
+  if (tc) tc.textContent = '0s';
+
+  if (step.waterTo > step.waterFrom) {
+    const pestVal = document.getElementById('pest-val-' + stepIdx);
+    const pestFill = document.getElementById('pest-fill-' + stepIdx);
+    const pestDot = document.querySelector('#pest-' + stepIdx + ' .pour-est-dot');
+    if (pestVal) pestVal.innerHTML = step.waterTo + '<span>ml</span>';
+    if (pestFill) { pestFill.style.width = '100%'; pestFill.style.animation = 'none'; }
+    if (pestDot) pestDot.style.animation = 'none';
+  }
+
+  timedQueuePos++;
+
+  if (timedQueuePos < timedQueue.length) {
+    // Advance to next timed step
+    stepStartMs = masterElapsedMs;
+    const nextIdx = timedQueue[timedQueuePos];
+    activateTimedStep(nextIdx);
+    masterRafId = requestAnimationFrame(masterTick);
+  } else {
+    // All done
+    brewRunning = false;
+    brewStarted = false;
+    brewFinished = true;
+    setMasterBtnState('done');
+    const masterEl = document.getElementById('masterElapsed');
+    if (masterEl) masterEl.style.color = 'var(--green)';
+
+    // Show completion overlay after short delay
+    setTimeout(() => showBrewComplete(), 600);
+  }
+}
+
+function setMasterBtnState(state) {
+  // ── Shared label/icon logic ──
+  const steps = getSteps(coffeeG, waterMl);
+  const stepIdx = timedQueue[timedQueuePos];
+  const step = stepIdx !== undefined ? steps[stepIdx] : null;
+
+  let iconHtml, labelText;
+
+  if (state === 'init') {
+    iconHtml = '<path d="M3 2.5L11 7L3 11.5V2.5Z" fill="currentColor"/>';
+    labelText = 'Start Brew';
+  } else if (state === 'running') {
+    iconHtml = '<rect x="2.5" y="2" width="3.5" height="10" rx="1.5" fill="currentColor"/><rect x="8" y="2" width="3.5" height="10" rx="1.5" fill="currentColor"/>';
+    labelText = (step && !step.isWait) ? 'Hold Pour' : 'Pause';
+  } else if (state === 'paused') {
+    iconHtml = '<path d="M3 2.5L11 7L3 11.5V2.5Z" fill="currentColor"/>';
+    labelText = 'Continue';
+  } else if (state === 'done') {
+    iconHtml = '<path d="M2 7L5.5 10.5L12 3.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" fill="none"/>';
+    labelText = 'Start Over';
+  }
+
+  // ── Static brew bar button ──
+  const btn = document.getElementById('masterBtn');
+  const lbl = document.getElementById('masterBtnLabel');
+  const icon = document.getElementById('masterIcon');
+  const resetLink = document.getElementById('resetLink');
+  if (btn) {
+    // Hide in init state — card button handles that; show once brewing
+    btn.style.display = (state === 'init') ? 'none' : 'inline-flex';
+    btn.classList.remove('paused', 'done-state');
+    btn.disabled = false;
+    icon.innerHTML = iconHtml;
+    lbl.textContent = labelText;
+    if (state === 'running') btn.classList.add('paused');
+    if (state === 'done') { btn.classList.add('done-state'); }
+    if (resetLink) resetLink.style.display = (state === 'init' || state === 'done') ? 'none' : 'block';
+  }
+
+  // ── Floating button ──
+  const fbar = document.getElementById('floatBrewBar');
+  const fbtn = document.getElementById('floatBtn');
+  const flbl = document.getElementById('floatBtnLabel');
+  const ficon = document.getElementById('floatIcon');
+  const fstep = document.getElementById('floatStepLabel');
+
+  if (state === 'init') {
+    if (fbar) fbar.classList.remove('visible');
+  } else {
+    if (fbar) fbar.classList.add('visible');
+    if (fbtn) {
+      fbtn.classList.remove('paused', 'done-state');
+      fbtn.disabled = false;
+      ficon.innerHTML = iconHtml;
+      flbl.textContent = labelText;
+      if (state === 'running') fbtn.classList.add('paused');
+      if (state === 'done') { fbtn.classList.add('done-state'); }
+    }
+    if (fstep && step) fstep.textContent = step.title;
+    else if (fstep && state === 'done') fstep.textContent = 'Brew complete';
+  }
+}
+
+// Keep float elapsed in sync with master tick
+function updateFloatElapsed() {
+  const totalSec = Math.floor(masterElapsedMs / 1000);
+  const mm = Math.floor(totalSec / 60);
+  const ss = String(totalSec % 60).padStart(2, '0');
+  // Sync step label live
+  const steps = getSteps(coffeeG, waterMl);
+  const stepIdx = timedQueue[timedQueuePos];
+  const step = stepIdx !== undefined ? steps[stepIdx] : null;
+  const fstep = document.getElementById('floatStepLabel');
+  if (fstep && step) fstep.textContent = step.title;
+}
+
+function manualDone(i) {
+  const card = document.getElementById('step-card-' + i);
+  const btn = document.getElementById('btn-' + i);
+  if (card) { card.classList.remove('current'); card.classList.add('done'); }
+  if (btn) { btn.disabled = true; btn.style.opacity = '0.4'; btn.style.pointerEvents = 'none'; }
+
+  // Immediately fire countdown — combined action
+  startCountdown();
+}
+
+function resetBrew() {
+  cancelAnimationFrame(masterRafId);
+  masterRafId = null;
+  brewRunning = false;
+  brewPaused = false;
+  brewStarted = false;
+  masterElapsedMs = 0;
+  masterLastTimestamp = null;
+  timedQueue = [];
+  timedQueuePos = 0;
+  stepStartMs = 0;
+
+  const drainHold = document.getElementById('drainHold');
+  if (drainHold) drainHold.classList.remove('active');
+  const el = document.getElementById('masterElapsed');
+  if (el) { el.textContent = '0:00'; el.style.color = ''; }
+
+  setMasterBtnState('init');
+  const masterBtn = document.getElementById('masterBtn');
+  if (masterBtn) masterBtn.style.display = 'none';
+  if (btn) {
+    btn.disabled = false;
+    btn.classList.remove('paused');
+    const lbl = document.getElementById('masterBtnLabel');
+    if (lbl) lbl.textContent = 'Start Brew';
+    const icon = document.getElementById('masterIcon');
+    if (icon) icon.innerHTML = '<path d="M3 2.5L10.5 6.5L3 10.5V2.5Z" fill="currentColor"/>';
+  }
+
+  renderSteps();
+}
+
+// ─────────────────────────────────────────────
+//  BREW COMPLETE OVERLAY
+// ─────────────────────────────────────────────
+function showBrewComplete() {
+  const overlay = document.getElementById('brewComplete');
+  if (!overlay) return;
+
+  // Populate stats
+  const totalSec = Math.floor(masterElapsedMs / 1000);
+  const mm = Math.floor(totalSec / 60);
+  const ss = String(totalSec % 60).padStart(2, '0');
+  const timeEl = document.getElementById('completeBrewTime');
+  if (timeEl) timeEl.textContent = 'Brewed in ' + mm + ':' + ss;
+
+  const statCoffee = document.getElementById('completeStatCoffee');
+  const statWater  = document.getElementById('completeStatWater');
+  const statRatio  = document.getElementById('completeStatRatio');
+  if (statCoffee) statCoffee.textContent = coffeeG + 'g';
+  if (statWater)  statWater.textContent  = waterMl + 'ml';
+  if (statRatio)  statRatio.textContent  = '1:' + currentRatio;
+
+  overlay.classList.add('active');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeBrewComplete() {
+  const overlay = document.getElementById('brewComplete');
+  if (overlay) overlay.classList.remove('active');
+  document.body.style.overflow = '';
+}
+
+function brewAgain() {
+  closeBrewComplete();
+  resetBrew();
+}
+
+// ─────────────────────────────────────────────
+//  PERSIST PREFERENCES
+// ─────────────────────────────────────────────
+function savePrefs() {
+  try {
+    localStorage.setItem('v60_prefs', JSON.stringify({
+      ratio: currentRatio,
+      coffee: coffeeG,
+      water: waterMl,
+    }));
+  } catch(e) {}
+}
+
+function loadPrefs() {
+  try {
+    const raw = localStorage.getItem('v60_prefs');
+    if (!raw) return;
+    const p = JSON.parse(raw);
+    if (p.ratio) currentRatio = p.ratio;
+    if (p.coffee) coffeeG = p.coffee;
+    if (p.water) waterMl = p.water;
+  } catch(e) {}
+}
+
+// ─────────────────────────────────────────────
+//  INIT
+// ─────────────────────────────────────────────
+loadPrefs();
+document.getElementById('coffeeInput').value = coffeeG;
+document.getElementById('waterInput').value = waterMl;
+
+// Mark saved ratio button active
+document.querySelectorAll('.ratio-btn').forEach(b => {
+  b.classList.toggle('active', parseInt(b.dataset.ratio) === currentRatio);
+});
+
+updateResults();
+renderSteps();
+
+// ── iOS / PWA TOUCH FIXES ──
+// Prevent rubber-band overscroll on iOS at document level
+document.addEventListener('touchmove', function(e) {
+  if (e.target.closest('.sidebar, .main, .mobile-drawer, .steps-container')) return;
+  e.preventDefault();
+}, { passive: false });
+
+// Prevent double-tap zoom on buttons
+document.querySelectorAll('button, input').forEach(el => {
+  el.addEventListener('touchend', function(e) { e.preventDefault(); this.click(); }, { passive: false });
+});
+
+// Lock orientation hint (works when added to home screen)
+if (screen.orientation && screen.orientation.lock) {
+  screen.orientation.lock('portrait').catch(() => {});
+}
+
+</script>
+
+<!-- ── FLOATING BREW CONTROL ── -->
+<div class="float-brew-bar" id="floatBrewBar">
+  <div class="float-step-label" id="floatStepLabel">Ready</div>
+  <button class="float-btn" id="floatBtn" onclick="handleMaster()">
+    <svg width="12" height="12" viewBox="0 0 14 14" fill="none" id="floatIcon"><path d="M3 2.5L11 7L3 11.5V2.5Z" fill="currentColor"/></svg>
+    <span id="floatBtnLabel">Start Brew</span>
+  </button>
+</div>
+
+
+<!-- ── BREW COMPLETE OVERLAY ── -->
+<div class="brew-complete" id="brewComplete">
+  <div class="complete-inner">
+
+    <div class="complete-hero">
+      <!-- Cup SVG -->
+      <svg class="complete-cup" viewBox="0 0 72 72" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <!-- steam lines -->
+        <path d="M24 18 Q22 14 24 10 Q26 6 24 2" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round" opacity="0.4"/>
+        <path d="M36 16 Q34 12 36 8 Q38 4 36 0" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round" opacity="0.6"/>
+        <path d="M48 18 Q46 14 48 10 Q50 6 48 2" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round" opacity="0.4"/>
+        <!-- cup body -->
+        <path d="M16 26 L20 58 L52 58 L56 26 Z" stroke="currentColor" stroke-width="2" fill="none" stroke-linejoin="round"/>
+        <!-- rim -->
+        <line x1="14" y1="26" x2="58" y2="26" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+        <!-- handle -->
+        <path d="M56 34 Q66 34 66 42 Q66 50 56 50" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/>
+        <!-- saucer -->
+        <path d="M10 62 Q36 66 62 62" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/>
+        <!-- coffee surface line -->
+        <path d="M21 34 Q36 38 51 34" stroke="currentColor" stroke-width="1.2" fill="none" stroke-linecap="round" opacity="0.5"/>
+      </svg>
+
+      <div class="complete-eyebrow">Brew Complete</div>
+      <div class="complete-title">Your Coffee<br>is Ready</div>
+      <div class="complete-sub" id="completeBrewTime">Brewed in 0:00</div>
+
+      <div class="complete-stats">
+        <div class="complete-stat">
+          <div class="complete-stat-val" id="completeStatCoffee">15g</div>
+          <div class="complete-stat-key">Coffee</div>
+        </div>
+        <div class="complete-stat">
+          <div class="complete-stat-val" id="completeStatWater">225ml</div>
+          <div class="complete-stat-key">Water</div>
+        </div>
+        <div class="complete-stat">
+          <div class="complete-stat-val" id="completeStatRatio">1:15</div>
+          <div class="complete-stat-key">Ratio</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="complete-serves">
+      <div class="complete-serves-title">Ways to Enjoy It</div>
+      <div class="serve-grid">
+
+        <div class="serve-card">
+          <div class="serve-icon">
+            <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
+              <circle cx="14" cy="16" r="8" stroke="currentColor" stroke-width="1.5"/>
+              <path d="M10 12 Q14 10 18 12" stroke="currentColor" stroke-width="1.2" fill="none" stroke-linecap="round"/>
+              <line x1="14" y1="6" x2="14" y2="8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+              <line x1="10" y1="7" x2="11" y2="9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+              <line x1="18" y1="7" x2="17" y2="9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+            </svg>
+          </div>
+          <div class="serve-name">Black, Hot</div>
+          <div class="serve-desc">Pour straight into a pre-heated mug. Drink as-is to taste every note.</div>
+          <div class="serve-tag">Classic</div>
+        </div>
+
+        <div class="serve-card">
+          <div class="serve-icon">
+            <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
+              <rect x="8" y="10" width="12" height="14" rx="2" stroke="currentColor" stroke-width="1.5"/>
+              <line x1="8" y1="16" x2="20" y2="16" stroke="currentColor" stroke-width="1" stroke-dasharray="2 2"/>
+              <path d="M11 8 Q14 5 17 8" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+              <line x1="20" y1="14" x2="23" y2="14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+            </svg>
+          </div>
+          <div class="serve-name">Iced Black</div>
+          <div class="serve-desc">Fill a glass with ice, pour over slowly. Brew double-strength for best results.</div>
+          <div class="serve-tag">Refreshing</div>
+        </div>
+
+        <div class="serve-card">
+          <div class="serve-icon">
+            <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
+              <rect x="7" y="10" width="14" height="14" rx="2" stroke="currentColor" stroke-width="1.5"/>
+              <path d="M11 10 L11 7 Q14 5 17 7 L17 10" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M10 17 Q14 20 18 17" stroke="currentColor" stroke-width="1.2" fill="none" stroke-linecap="round"/>
+              <line x1="21" y1="15" x2="24" y2="15" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+            </svg>
+          </div>
+          <div class="serve-name">With Milk</div>
+          <div class="serve-desc">Add a splash of warm whole milk or oat milk. No foam, just smooth.</div>
+          <div class="serve-tag">Smooth</div>
+        </div>
+
+        <div class="serve-card">
+          <div class="serve-icon">
+            <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
+              <rect x="7" y="10" width="14" height="14" rx="2" stroke="currentColor" stroke-width="1.5"/>
+              <line x1="7" y1="17" x2="21" y2="17" stroke="currentColor" stroke-width="1" stroke-dasharray="2 2"/>
+              <path d="M10 8 Q14 5 18 8" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+              <circle cx="14" cy="13" r="1.5" fill="currentColor" opacity="0.4"/>
+            </svg>
+          </div>
+          <div class="serve-name">Iced Oat Milk</div>
+          <div class="serve-desc">Ice cubes, oat milk, pour coffee over. Natural sweetness complements light roasts.</div>
+          <div class="serve-tag">Popular</div>
+        </div>
+
+        <div class="serve-card">
+          <div class="serve-icon">
+            <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
+              <path d="M10 22 L8 10 L20 10 L18 22 Z" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linejoin="round"/>
+              <line x1="7" y1="10" x2="21" y2="10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+              <path d="M12 6 Q14 4 16 6" stroke="currentColor" stroke-width="1.2" fill="none" stroke-linecap="round"/>
+              <line x1="14" y1="15" x2="14" y2="20" stroke="currentColor" stroke-width="1" stroke-dasharray="1.5 2" stroke-linecap="round"/>
+            </svg>
+          </div>
+          <div class="serve-name">Honey &amp; Ice</div>
+          <div class="serve-desc">Stir in a teaspoon of raw honey while hot, then pour over ice. No refined sugar.</div>
+          <div class="serve-tag">Naturally sweet</div>
+        </div>
+
+        <div class="serve-card">
+          <div class="serve-icon">
+            <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
+              <rect x="7" y="12" width="14" height="12" rx="2" stroke="currentColor" stroke-width="1.5"/>
+              <path d="M11 12 L11 9 Q14 6 17 9 L17 12" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+              <line x1="21" y1="16" x2="24" y2="16" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+              <path d="M10 18 Q14 21 18 18" stroke="currentColor" stroke-width="1.2" fill="none" stroke-linecap="round"/>
+              <path d="M12 8 Q14 5 16 8" stroke="currentColor" stroke-width="1" fill="none" stroke-linecap="round" opacity="0.5"/>
+            </svg>
+          </div>
+          <div class="serve-name">Condensed Milk</div>
+          <div class="serve-desc">2 tbsp sweetened condensed milk, stir in while hot. Vietnamese-style richness.</div>
+          <div class="serve-tag">Indulgent</div>
+        </div>
+
+      </div>
+    </div>
+
+    <div class="complete-footer">
+      <button class="complete-close-btn" onclick="closeBrewComplete()">
+        Back to Brew
+      </button>
+      <button class="complete-again-btn" onclick="brewAgain()">
+        <svg width="11" height="11" viewBox="0 0 12 12" fill="none"><path d="M10 6A4 4 0 1 1 6 2M6 2L8 0M6 2L8 4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Brew Again
+      </button>
+    </div>
+
+  </div>
+</div>
+
+</body>
+</html>
