@@ -8,7 +8,7 @@
     align-items: center;
     gap: 9px;
     background: var(--accent);
-    color: #fff;
+    color: var(--on-accent);
     border: 1.5px solid transparent;
     border-radius: 100px;
     padding: 13px 26px;
@@ -19,7 +19,7 @@
     cursor: pointer;
     transition: all 0.18s;
     white-space: nowrap;
-    box-shadow: 0 2px 10px rgba(156,106,58,0.22);
+    box-shadow: 0 2px 10px var(--accent-glow-btn);
   }
 
   .master-btn:active { transform: scale(0.96); }
@@ -56,6 +56,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500;600&family=DM+Mono:wght@300;400&display=swap" rel="stylesheet">
 <style>
+  /* ── DARK THEME (default) ── */
   :root {
     --bg: #faf8f5;
     --surface: #ffffff;
@@ -68,14 +69,103 @@
     --accent: #9c6a3a;
     --accent2: #b8895a;
     --accent-glow: rgba(156,106,58,0.10);
+    --accent-glow-btn: rgba(156,106,58,0.22);
     --white: #2a2018;
     --red: #b04040;
     --green: #4a7a3a;
     --mono: 'DM Mono', monospace;
     --serif: 'Cormorant Garamond', serif;
+    --on-accent: #ffffff;
+    --shadow-sm: rgba(0,0,0,0.08);
+    --shadow-md: rgba(0,0,0,0.14);
+    --topbar-bg: rgba(250,248,245,0.96);
+    --float-bg:  rgba(255,255,255,0.92);
+    --overlay-bg: rgba(250,248,245,0.94);
+    --glint: rgba(255,255,255,0.25);
   }
 
-  * { margin: 0; padding: 0; box-sizing: border-box; }
+  /* ── LIGHT THEME (explicit warm-light mode) ── */
+  [data-theme="light"] {
+    --bg: #faf8f5;
+    --surface: #ffffff;
+    --surface2: #f2ede8;
+    --border: #e4ddd6;
+    --border2: #cfc6bc;
+    --text: #2a2018;
+    --text-muted: #8a7a6a;
+    --text-dim: #bfb3a6;
+    --accent: #9c6a3a;
+    --accent2: #b8895a;
+    --accent-glow: rgba(156,106,58,0.10);
+    --accent-glow-btn: rgba(156,106,58,0.22);
+    --white: #2a2018;
+    --red: #b04040;
+    --green: #4a7a3a;
+    --on-accent: #ffffff;
+    --shadow-sm: rgba(0,0,0,0.08);
+    --shadow-md: rgba(0,0,0,0.14);
+    --topbar-bg: rgba(250,248,245,0.96);
+    --float-bg:  rgba(250,248,245,0.92);
+    --overlay-bg: rgba(250,248,245,0.94);
+    --glint: rgba(255,255,255,0.25);
+  }
+
+  /* ── DARK THEME ── */
+  [data-theme="dark"] {
+    --bg:          #131110;
+    --surface:     #1b1815;
+    --surface2:    #221f1b;
+    --border:      #2c2822;
+    --border2:     #3d3830;
+    --text:        #ede8e0;
+    --text-muted:  #8a7a6a;
+    --text-dim:    #46403a;
+    --accent:      #c47e3a;
+    --accent2:     #a86530;
+    --accent-glow: rgba(196,126,58,0.13);
+    --accent-glow-btn: rgba(196,126,58,0.28);
+    --white:       #ede8e0;
+    --red:         #c45050;
+    --green:       #5a9a48;
+    --on-accent: #ffffff;
+    --shadow-sm: rgba(0,0,0,0.24);
+    --shadow-md: rgba(0,0,0,0.40);
+    --topbar-bg: rgba(19,17,16,0.96);
+    --float-bg:  rgba(27,24,21,0.96);
+    --overlay-bg: rgba(19,17,16,0.94);
+    --glint: rgba(255,255,255,0.08);
+  }
+
+  /* ── THEME TRANSITION ── */
+  *, *::before, *::after {
+    transition: background-color 0.25s ease, border-color 0.25s ease, color 0.25s ease, box-shadow 0.25s ease;
+  }
+
+  /* override transition for animated elements */
+  .timer-progress, .water-fill, .pour-est-fill {
+    transition: stroke-dashoffset 0.5s linear, width 0.5s ease !important;
+  }
+
+  /* ── THEME TOGGLE BUTTON ── */
+  .theme-toggle {
+    width: 40px; height: 40px;
+    border-radius: 10px;
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+    flex-shrink: 0;
+  }
+  .theme-toggle:hover { border-color: var(--accent); color: var(--accent); }
+  .theme-toggle svg { width: 16px; height: 16px; }
+
+  /* Hide all scrollbars */
+  * { scrollbar-width: none; -ms-overflow-style: none; }
+  *::-webkit-scrollbar { display: none; }
 
   html { scroll-behavior: smooth; }
 
@@ -113,14 +203,6 @@
     height: calc(56px + env(safe-area-inset-top));
     align-items: flex-end;
     padding-bottom: 10px;
-  }
-
-  /* Bottom nav: always above home indicator */
-  .mobile-nav {
-    padding-bottom: max(8px, env(safe-area-inset-bottom));
-    height: calc(58px + env(safe-area-inset-bottom));
-    padding-left: env(safe-area-inset-left);
-    padding-right: env(safe-area-inset-right);
   }
 
   /* Sections: never hidden behind bottom nav */
@@ -253,15 +335,15 @@
     position: sticky;
     top: 0;
     z-index: 100;
-    background: rgba(250,248,245,0.96);
+    background: var(--topbar-bg);
     backdrop-filter: blur(16px);
     -webkit-backdrop-filter: blur(16px);
     border-bottom: 1px solid var(--border);
-    padding: 0 20px;
+    padding: 0 16px;
     padding-top: env(safe-area-inset-top);
-    height: calc(56px + env(safe-area-inset-top));
+    height: calc(52px + env(safe-area-inset-top));
     align-items: flex-end;
-    padding-bottom: 10px;
+    padding-bottom: 8px;
     justify-content: space-between;
   }
 
@@ -294,9 +376,11 @@
 
   /* ── SECTIONS ── */
   .section {
-    padding: 60px 64px;
+    padding: 48px 52px;
     border-bottom: 1px solid var(--border);
     display: none;
+    max-width: 100%;
+    box-sizing: border-box;
   }
 
   .section.active { display: block; }
@@ -316,7 +400,7 @@
 
   .section-title {
     font-family: var(--serif);
-    font-size: 42px;
+    font-size: 38px;
     font-weight: 300;
     letter-spacing: 0.02em;
     color: var(--white);
@@ -404,13 +488,14 @@
     background: var(--surface2);
     border: 1px solid var(--border);
     border-radius: 8px;
-    padding: 14px 48px 14px 16px;
+    padding: 12px 44px 12px 14px;
     font-family: var(--mono);
-    font-size: 22px;
+    font-size: 20px;
     color: var(--white);
     outline: none;
     transition: border-color 0.2s;
     -moz-appearance: textfield;
+    box-sizing: border-box;
   }
 
   .calc-input::-webkit-outer-spin-button,
@@ -780,7 +865,7 @@
     position: absolute;
     right: 0; top: 0; bottom: 0;
     width: 12px;
-    background: rgba(255,255,255,0.25);
+    background: var(--glint);
     border-radius: 3px;
     animation: pour-glint 0.8s ease-in-out infinite;
   }
@@ -808,7 +893,7 @@
   .countdown-overlay {
     position: fixed;
     inset: 0;
-    background: rgba(250,248,245,0.94);
+    background: var(--overlay-bg);
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -850,47 +935,7 @@
   }
 
   /* ── MOBILE BOTTOM NAV ── */
-  .mobile-nav {
-    display: none;
-    position: fixed;
-    bottom: 0;
-    left: 0; right: 0;
-    background: rgba(255,255,255,0.97);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    border-top: 1px solid var(--border);
-    padding: 0 8px;
-    padding-bottom: env(safe-area-inset-bottom);
-    height: calc(60px + env(safe-area-inset-bottom));
-    z-index: 200;
-    align-items: flex-start;
-    padding-top: 8px;
-    justify-content: space-around;
-  }
 
-  .mob-nav-btn {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 4px;
-    padding: 8px 16px;
-    background: none;
-    border: none;
-    cursor: pointer;
-    color: var(--text-dim);
-    transition: color 0.2s;
-  }
-
-  .mob-nav-btn.active { color: var(--accent); }
-
-  .mob-nav-btn svg { width: 20px; height: 20px; }
-
-  .mob-nav-label {
-    font-family: var(--mono);
-    font-size: 9px;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-  }
 
   /* ── MOBILE DRAWER NAV ── */
   .mobile-drawer {
@@ -915,12 +960,11 @@
     .app { grid-template-columns: 1fr; }
     .sidebar { display: none; }
     .topbar { display: flex; }
-    .mobile-nav { display: flex; }
     .mobile-drawer { display: block; }
 
     .section {
-      padding: 28px 20px;
-      padding-bottom: calc(100px + env(safe-area-inset-bottom));
+      padding: 24px 20px;
+      padding-bottom: calc(80px + env(safe-area-inset-bottom));
     }
 
     .section-title { font-size: 30px; }
@@ -1035,6 +1079,17 @@
   .gear-item-icon {
     margin-bottom: 12px;
     color: var(--accent);
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .gear-item-icon svg {
+    width: 28px;
+    height: 28px;
+    max-width: 28px;
+    max-height: 28px;
   }
 
   .gear-item-name {
@@ -1079,12 +1134,12 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 16px;
-    margin-bottom: 32px;
+    gap: 12px;
+    margin-bottom: 24px;
     background: var(--surface);
     border: 1px solid var(--border);
     border-radius: 12px;
-    padding: 16px 24px;
+    padding: 14px 20px;
     flex-wrap: wrap;
   }
 
@@ -1248,7 +1303,7 @@
     left: 50%;
     transform: translateX(-50%);
     z-index: 300;
-    background: rgba(255,255,255,0.92);
+    background: var(--float-bg);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
     border: 1px solid var(--border);
@@ -1257,7 +1312,7 @@
     display: none;
     align-items: center;
     gap: 14px;
-    box-shadow: 0 4px 24px rgba(0,0,0,0.10), 0 1px 4px rgba(0,0,0,0.06);
+    box-shadow: 0 4px 24px var(--shadow-md), 0 1px 4px var(--shadow-sm);
     min-width: 240px;
     max-width: calc(100vw - 40px);
     animation: floatUp 0.3s cubic-bezier(0.34,1.4,0.64,1);
@@ -1284,7 +1339,7 @@
     align-items: center;
     gap: 8px;
     background: var(--accent);
-    color: #fff;
+    color: var(--on-accent);
     border: 1.5px solid transparent;
     border-radius: 100px;
     padding: 11px 20px;
@@ -1332,7 +1387,7 @@
     width: 100%;
     margin-top: 24px;
     background: var(--accent);
-    color: #fff;
+    color: var(--on-accent);
     border: none;
     border-radius: 12px;
     padding: 16px 24px;
@@ -1342,7 +1397,7 @@
     text-transform: uppercase;
     cursor: pointer;
     transition: all 0.18s;
-    box-shadow: 0 2px 10px rgba(156,106,58,0.22);
+    box-shadow: 0 2px 10px var(--accent-glow-btn);
   }
 
   .card-start-btn:active { transform: scale(0.98); opacity: 0.9; }
@@ -1505,7 +1560,7 @@
 
   .serve-card:hover {
     border-color: var(--accent2);
-    box-shadow: 0 2px 12px rgba(156,106,58,0.08);
+    box-shadow: 0 2px 12px var(--accent-glow);
   }
 
   .serve-icon {
@@ -1582,7 +1637,7 @@
     justify-content: center;
     gap: 8px;
     background: var(--accent);
-    color: #fff;
+    color: var(--on-accent);
     border: none;
     border-radius: 100px;
     padding: 13px 20px;
@@ -1592,11 +1647,961 @@
     text-transform: uppercase;
     cursor: pointer;
     transition: all 0.18s;
-    box-shadow: 0 2px 10px rgba(156,106,58,0.22);
+    box-shadow: 0 2px 10px var(--accent-glow-btn);
   }
 
   .complete-again-btn:active { transform: scale(0.97); }
 
+  /* Desktop brew panel hidden on mobile */
+  #brew-panel-desktop { display: none; }
+
+  /* ══════════════════════════════════════════════════════
+     DESKTOP REDESIGN  ≥901px
+     No sidebar. Full-screen brew canvas. Fixed top bar.
+  ══════════════════════════════════════════════════════ */
+  @media (min-width: 901px) {
+
+    html, body { height: 100%; overflow: hidden; }
+    body { background: var(--bg); }
+
+    /* ── KILL OLD LAYOUT COMPLETELY ── */
+    .app { display: none !important; }
+    .float-brew-bar { display: none !important; }
+    .countdown-overlay { z-index: 9999 !important; }
+
+    /* ── DESKTOP TOP BAR ── */
+    .dt-bar {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      height: 60px;
+      background: var(--bg);
+      border-bottom: 1px solid var(--border);
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      align-items: center;
+      padding: 0 24px;
+      gap: 0;
+      z-index: 100;
+    }
+
+    /* Logo group — left-aligned */
+    .dt-logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-shrink: 0;
+    }
+    .dt-logo svg { width: 20px; height: 20px; flex-shrink: 0; }
+    .dt-logo-text {
+      font-family: var(--serif);
+      font-size: 16px;
+      font-weight: 300;
+      letter-spacing: 0.05em;
+      color: var(--white);
+      white-space: nowrap;
+    }
+    .dt-logo-sub {
+      font-family: var(--mono);
+      font-size: 8px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-top: 1px;
+    }
+
+    /* Center section: methods + ratio + inputs */
+    .dt-center {
+      display: flex;
+      align-items: center;
+      gap: 0;
+    }
+
+    /* Method selector */
+    .dt-methods {
+      display: flex;
+      gap: 2px;
+      flex-shrink: 0;
+      padding: 0 20px 0 0;
+      margin-right: 20px;
+      border-right: 1px solid var(--border);
+    }
+    .dt-method-btn {
+      font-family: var(--mono);
+      font-size: 10px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      padding: 5px 10px;
+      border-radius: 6px;
+      border: 1px solid transparent;
+      background: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: all 0.15s;
+      white-space: nowrap;
+    }
+    .dt-method-btn:hover { background: var(--surface2); color: var(--text); }
+    .dt-method-btn.active { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
+
+    /* Ratio controls inline */
+    .dt-ratio {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .dt-ratio-label {
+      font-family: var(--mono);
+      font-size: 9px;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+
+    .dt-ratio-btns {
+      display: flex;
+      gap: 3px;
+    }
+
+    .dt-ratio-btn {
+      font-family: var(--mono);
+      font-size: 11px;
+      letter-spacing: 0.04em;
+      padding: 4px 10px;
+      border-radius: 5px;
+      border: 1px solid var(--border);
+      background: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .dt-ratio-btn:hover { border-color: var(--accent2); color: var(--accent); }
+    .dt-ratio-btn.active { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
+
+    .dt-divider {
+      width: 1px;
+      height: 24px;
+      background: var(--border);
+      flex-shrink: 0;
+      margin: 0 12px;
+    }
+
+    .dt-inputs {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .dt-input-wrap {
+      display: flex;
+      align-items: center;
+      gap: 0;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 7px;
+      overflow: hidden;
+    }
+    .dt-input-wrap:focus-within { border-color: var(--accent2); }
+
+    .dt-input {
+      width: 48px;
+      background: none;
+      border: none;
+      outline: none;
+      font-family: var(--mono);
+      font-size: 13px;
+      color: var(--text);
+      padding: 5px 4px 5px 8px;
+      text-align: right;
+    }
+    /* Remove number input spinners */
+    .dt-input::-webkit-inner-spin-button,
+    .dt-input::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+    .dt-input[type=number] { -moz-appearance: textfield; }
+
+    .dt-input-unit {
+      font-family: var(--mono);
+      font-size: 10px;
+      color: var(--text-muted);
+      padding: 0 8px 0 2px;
+      letter-spacing: 0.04em;
+    }
+
+    .dt-result-pills {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      padding-left: 12px;
+      margin-left: 12px;
+      border-left: 1px solid var(--border);
+    }
+
+    .dt-pill {
+      font-family: var(--mono);
+      font-size: 10px;
+      letter-spacing: 0.05em;
+      padding: 4px 10px;
+      border-radius: 20px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      white-space: nowrap;
+    }
+    .dt-pill strong { color: var(--accent); font-weight: 500; }
+
+    /* Right side controls — right-aligned */
+    .dt-right {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      justify-content: flex-end;
+    }
+
+    /* Gear popover button */
+    .dt-gear-btn {
+      width: 36px; height: 36px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      transition: all 0.15s;
+    }
+    .dt-gear-btn:hover, .dt-gear-btn.open { border-color: var(--accent); color: var(--accent); }
+    .dt-gear-btn svg { width: 16px; height: 16px; }
+
+    /* Gear popover panel */
+    .dt-gear-panel {
+      position: fixed;
+      top: 64px;
+      right: 32px;
+      width: 440px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 28px;
+      box-shadow: 0 16px 48px var(--shadow-md);
+      z-index: 200;
+      display: none;
+    }
+    .dt-gear-panel.open { display: block; }
+
+    .dt-gear-title {
+      font-family: var(--mono);
+      font-size: 9px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 16px;
+    }
+
+    .dt-gear-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+
+    .dt-gear-item {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 14px 12px;
+      text-align: center;
+    }
+    .dt-gear-item svg { width: 20px; height: 20px; color: var(--accent); margin-bottom: 8px; }
+    .dt-gear-item-name {
+      font-family: var(--serif);
+      font-size: 13px;
+      color: var(--white);
+      letter-spacing: 0.02em;
+    }
+    .dt-gear-item-note {
+      font-family: var(--mono);
+      font-size: 9px;
+      letter-spacing: 0.08em;
+      color: var(--text-muted);
+      margin-top: 3px;
+    }
+
+    .dt-gear-note {
+      font-family: var(--mono);
+      font-size: 10px;
+      letter-spacing: 0.04em;
+      color: var(--text-muted);
+      line-height: 1.7;
+      padding: 12px 14px;
+      background: var(--surface2);
+      border-radius: 8px;
+      border-left: 2px solid var(--accent);
+    }
+
+    /* Gear popover backdrop */
+    .dt-backdrop {
+      position: fixed;
+      inset: 0;
+      z-index: 199;
+      display: none;
+    }
+    .dt-backdrop.open { display: block; }
+
+    /* ── BREW CANVAS (3-column layout) ── */
+    .dt-brew {
+      position: fixed;
+      top: 60px;
+      left: 0; right: 0; bottom: 0;
+      background: var(--bg);
+      display: grid;
+      grid-template-columns: 260px 1fr 260px;
+      overflow: hidden;
+    }
+
+    .dt-brew-inner {
+      overflow-y: auto;
+      padding: 44px 48px 100px;
+    }
+
+    /* ── LEFT PANEL ── */
+    .dt-panel-left {
+      border-right: 1px solid var(--border);
+      padding: 32px 24px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+    }
+
+    .dt-panel-label {
+      font-family: var(--mono);
+      font-size: 9px;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      margin-bottom: 12px;
+    }
+
+    .dt-panel-section {
+      padding-bottom: 24px;
+      margin-bottom: 24px;
+      border-bottom: 1px solid var(--border);
+    }
+    .dt-panel-section:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+
+    /* Live brew summary */
+    .dt-live-elapsed {
+      font-family: var(--mono);
+      font-size: 36px;
+      color: var(--accent);
+      letter-spacing: 0.06em;
+      line-height: 1;
+      margin-bottom: 4px;
+    }
+
+    .dt-live-elapsed-label {
+      font-family: var(--mono);
+      font-size: 9px;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+    }
+
+    .dt-live-step {
+      margin-top: 16px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 14px 16px;
+    }
+
+    .dt-live-step-label {
+      font-family: var(--mono);
+      font-size: 9px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+    }
+
+    .dt-live-step-name {
+      font-family: var(--serif);
+      font-size: 18px;
+      font-weight: 500;
+      color: var(--text);
+      line-height: 1.2;
+    }
+
+    .dt-live-step-timing {
+      font-family: var(--mono);
+      font-size: 10px;
+      color: var(--text-muted);
+      margin-top: 4px;
+      letter-spacing: 0.05em;
+    }
+
+    /* Water progress */
+    .dt-water-total-track {
+      height: 6px;
+      background: var(--surface2);
+      border-radius: 3px;
+      overflow: hidden;
+      margin-top: 8px;
+      margin-bottom: 6px;
+    }
+    .dt-water-total-fill {
+      height: 100%;
+      background: linear-gradient(to right, var(--accent2), var(--accent));
+      border-radius: 3px;
+      width: 0%;
+      transition: width 0.5s ease;
+    }
+    .dt-water-total-labels {
+      display: flex;
+      justify-content: space-between;
+      font-family: var(--mono);
+      font-size: 9px;
+      color: var(--text-dim);
+      letter-spacing: 0.06em;
+    }
+    .dt-water-total-labels .wt-cur { color: var(--accent); }
+
+    /* Recipe summary */
+    .dt-recipe-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      padding: 8px 0;
+      border-bottom: 1px solid var(--border);
+      font-family: var(--mono);
+    }
+    .dt-recipe-row:last-child { border-bottom: none; }
+    .dt-recipe-key {
+      font-size: 9px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+    }
+    .dt-recipe-val {
+      font-size: 14px;
+      color: var(--text);
+    }
+    .dt-recipe-val strong { color: var(--accent); font-weight: 400; }
+
+    /* ── RIGHT PANEL ── */
+    .dt-panel-right {
+      border-left: 1px solid var(--border);
+      padding: 32px 24px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+    }
+
+    /* Grind guide */
+    .dt-grind-visual {
+      display: flex;
+      align-items: flex-end;
+      gap: 3px;
+      margin: 12px 0;
+      height: 32px;
+    }
+
+    .dt-grind-bar {
+      flex: 1;
+      background: var(--border);
+      border-radius: 2px 2px 0 0;
+      transition: background 0.2s;
+    }
+    .dt-grind-bar.active { background: var(--accent); }
+
+    .dt-grind-labels {
+      display: flex;
+      justify-content: space-between;
+      font-family: var(--mono);
+      font-size: 8px;
+      letter-spacing: 0.08em;
+      color: var(--text-dim);
+      text-transform: uppercase;
+    }
+
+    .dt-tip-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 14px 16px;
+      margin-top: 8px;
+    }
+
+    .dt-tip-title {
+      font-family: var(--serif);
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--text);
+      margin-bottom: 4px;
+    }
+
+    .dt-tip-body {
+      font-family: var(--mono);
+      font-size: 10px;
+      letter-spacing: 0.02em;
+      color: var(--text-muted);
+      line-height: 1.7;
+    }
+
+    /* Gear checklist */
+    .dt-gear-check-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 7px 0;
+      border-bottom: 1px solid var(--border);
+      font-family: var(--mono);
+      font-size: 10px;
+      letter-spacing: 0.06em;
+      color: var(--text-muted);
+    }
+    .dt-gear-check-item:last-child { border-bottom: none; }
+    .dt-gear-check-item svg { width: 14px; height: 14px; color: var(--accent); flex-shrink: 0; }
+
+    /* Temperature display */
+    .dt-temp-display {
+      display: flex;
+      align-items: baseline;
+      gap: 6px;
+      margin: 8px 0;
+    }
+    .dt-temp-big {
+      font-family: var(--mono);
+      font-size: 28px;
+      color: var(--text);
+      letter-spacing: -0.01em;
+    }
+    .dt-temp-unit {
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+    .dt-temp-note {
+      font-family: var(--mono);
+      font-size: 9px;
+      letter-spacing: 0.06em;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    /* Brew header */
+    .dt-brew-head {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      margin-bottom: 40px;
+      padding-bottom: 24px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .dt-brew-eyebrow {
+      font-family: var(--mono);
+      font-size: 9px;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 10px;
+    }
+
+    .dt-brew-title {
+      font-family: var(--serif);
+      font-size: 72px;
+      font-weight: 300;
+      color: var(--white);
+      line-height: 0.9;
+      letter-spacing: 0.01em;
+    }
+
+    .dt-brew-controls {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 12px;
+    }
+
+    .dt-elapsed {
+      font-family: var(--mono);
+      font-size: 42px;
+      color: var(--accent);
+      letter-spacing: 0.06em;
+      line-height: 1;
+    }
+
+    .dt-master-btn {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-family: var(--mono);
+      font-size: 11px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      padding: 10px 20px;
+      border-radius: 8px;
+      background: var(--accent);
+      color: var(--on-accent);
+      border: none;
+      cursor: pointer;
+      transition: all 0.15s;
+      box-shadow: 0 2px 10px var(--accent-glow-btn);
+    }
+    .dt-master-btn:hover { background: var(--accent2); }
+    .dt-master-btn.paused { background: var(--surface2); color: var(--text); border: 1px solid var(--border); box-shadow: none; }
+    .dt-master-btn.done-state { background: var(--green); }
+    .dt-master-btn:disabled { opacity: 0.45; cursor: default; box-shadow: none; }
+
+    .dt-reset-link {
+      background: none; border: none;
+      font-family: var(--mono); font-size: 9px;
+      letter-spacing: 0.14em; text-transform: uppercase;
+      color: var(--text-dim); cursor: pointer; padding: 0;
+      transition: color 0.2s;
+    }
+    .dt-reset-link:hover { color: var(--red); }
+
+    .dt-recipe-label {
+      font-family: var(--mono);
+      font-size: 10px;
+      letter-spacing: 0.1em;
+      color: var(--text-muted);
+    }
+
+    /* Drain hold */
+    .dt-drain {
+      display: none;
+      align-items: center;
+      gap: 14px;
+      background: var(--surface2);
+      border: 1px solid var(--accent2);
+      border-radius: 10px;
+      padding: 14px 18px;
+      margin-bottom: 20px;
+    }
+    .dt-drain.active { display: flex; }
+    .dt-drain svg { width: 24px; height: 24px; color: var(--accent); flex-shrink: 0; }
+    .dt-drain-title { font-family: var(--serif); font-size: 16px; font-weight: 500; color: var(--text); }
+    .dt-drain-sub { font-family: var(--mono); font-size: 11px; color: var(--text-muted); letter-spacing: 0.06em; margin-top: 2px; }
+    .dt-drain-dot {
+      width: 7px; height: 7px; border-radius: 50%;
+      background: var(--accent); margin-left: auto; flex-shrink: 0;
+      animation: pulse 1.2s ease-in-out infinite;
+    }
+
+    /* Steps */
+    .dt-steps { display: flex; flex-direction: column; gap: 10px; }
+
+    .dt-step {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 24px 28px;
+      transition: all 0.3s;
+    }
+
+    .dt-step.current {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 1px var(--accent), 0 8px 32px var(--accent-glow);
+    }
+
+    .dt-step.done { opacity: 0.25; pointer-events: none; }
+    .dt-step.locked { opacity: 0.45; }
+
+    .dt-step-top {
+      display: flex;
+      align-items: flex-start;
+      gap: 18px;
+    }
+
+    .dt-step-num {
+      font-family: var(--mono);
+      font-size: 11px;
+      letter-spacing: 0.1em;
+      color: var(--text-muted);
+      flex-shrink: 0;
+      padding-top: 3px;
+      min-width: 24px;
+    }
+
+    .dt-step.current .dt-step-num { color: var(--accent); }
+
+    .dt-step-info { flex: 1; }
+
+    .dt-step-badge {
+      font-family: var(--mono);
+      font-size: 9px;
+      font-weight: 600;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      padding: 3px 8px;
+      border-radius: 4px;
+      margin-bottom: 8px;
+      display: inline-block;
+    }
+    .dt-step-badge.wait { background: var(--surface2); color: var(--green); border: 1px solid var(--border); }
+    .dt-step-badge.pour { background: var(--accent-glow); color: var(--accent); border: 1px solid var(--border); }
+    .dt-step-badge.manual { background: var(--surface2); color: var(--text-muted); border: 1px solid var(--border); }
+
+    .dt-step-title {
+      font-family: var(--serif);
+      font-size: 22px;
+      font-weight: 500;
+      color: var(--text);
+      letter-spacing: 0.01em;
+      line-height: 1.2;
+    }
+
+    .dt-step-timing {
+      font-family: var(--mono);
+      font-size: 11px;
+      letter-spacing: 0.1em;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+
+    .dt-step-timer {
+      flex-shrink: 0;
+    }
+
+    .dt-step-body {
+      margin-top: 16px;
+      padding-left: 42px;
+    }
+
+    .dt-step-instructions {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      margin-bottom: 12px;
+    }
+
+    .dt-step-instructions li {
+      font-family: var(--serif);
+      font-size: 16px;
+      color: var(--text);
+      line-height: 1.65;
+      display: flex;
+      gap: 10px;
+    }
+
+    .dt-step-instructions li::before {
+      content: attr(data-n);
+      font-family: var(--mono);
+      font-size: 9px;
+      color: var(--text-muted);
+      flex-shrink: 0;
+      padding-top: 5px;
+    }
+
+    .dt-step-note {
+      font-family: var(--mono);
+      font-size: 11px;
+      letter-spacing: 0.03em;
+      color: var(--text-muted);
+      font-style: italic;
+      line-height: 1.7;
+    }
+
+    /* Water bar */
+    .dt-water-bar {
+      display: none;
+      margin-top: 16px;
+    }
+    .dt-water-bar.active { display: block; }
+    .dt-water-track {
+      height: 3px;
+      background: var(--border);
+      border-radius: 2px;
+      overflow: hidden;
+      margin-bottom: 6px;
+    }
+    .dt-water-fill {
+      height: 100%;
+      background: var(--accent);
+      border-radius: 2px;
+      width: 0%;
+      transition: width 0.5s ease;
+    }
+    .dt-water-label {
+      display: flex;
+      justify-content: space-between;
+      font-family: var(--mono);
+      font-size: 9px;
+      color: var(--text-dim);
+      letter-spacing: 0.06em;
+    }
+    .dt-water-current { color: var(--accent); }
+
+    /* Manual start button */
+    .dt-card-btn {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-family: var(--mono);
+      font-size: 11px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      width: 100%;
+      padding: 14px 20px;
+      margin-top: 18px;
+      border-radius: 8px;
+      background: var(--accent);
+      color: var(--on-accent);
+      border: none;
+      cursor: pointer;
+      transition: all 0.15s;
+      justify-content: center;
+      box-shadow: 0 2px 10px var(--accent-glow-btn);
+    }
+    .dt-card-btn:hover { background: var(--accent2); }
+
+  }
+
+
+  /* ── FORMULA SECTION ── */
+  .formula-tabs {
+    display: flex;
+    gap: 4px;
+    margin-bottom: 28px;
+    background: var(--surface2);
+    padding: 4px;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+  }
+  .formula-tab {
+    flex: 1;
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 8px 0;
+    border-radius: 7px;
+    border: none;
+    background: none;
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .formula-tab.active { background: var(--surface); color: var(--accent); box-shadow: 0 1px 4px var(--shadow-sm); }
+  .formula-tab:hover:not(.active) { color: var(--text); }
+
+  .formula-block { display: none; }
+  .formula-block.active { display: block; }
+
+  .formula-meta {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 24px;
+  }
+  .formula-badge {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--accent);
+    border: 1px solid var(--accent2);
+    border-radius: 4px;
+    padding: 3px 10px;
+  }
+  .formula-difficulty {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    color: var(--text-muted);
+  }
+
+  .formula-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    margin-bottom: 24px;
+  }
+  @media (max-width: 900px) {
+    .formula-grid { grid-template-columns: repeat(2, 1fr); }
+  }
+
+  .formula-stat {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px 18px;
+  }
+  .formula-stat-key {
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 6px;
+  }
+  .formula-stat-val {
+    font-family: var(--serif);
+    font-size: 20px;
+    font-weight: 500;
+    color: var(--text);
+    margin-bottom: 4px;
+    line-height: 1.1;
+  }
+  .formula-stat-note {
+    font-family: var(--mono);
+    font-size: 9px;
+    color: var(--text-dim);
+    letter-spacing: 0.04em;
+    line-height: 1.5;
+  }
+
+  .formula-steps-summary {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+    margin-bottom: 20px;
+  }
+  .formula-step-row {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    padding: 10px 18px;
+    border-bottom: 1px solid var(--border);
+    font-family: var(--mono);
+    font-size: 11px;
+  }
+  .formula-step-row:last-child { border-bottom: none; }
+  .fsr-time {
+    color: var(--accent);
+    letter-spacing: 0.06em;
+    min-width: 44px;
+    flex-shrink: 0;
+  }
+  .fsr-name {
+    flex: 1;
+    color: var(--text);
+    letter-spacing: 0.03em;
+    padding: 0 12px;
+  }
+  .fsr-amount {
+    color: var(--text-muted);
+    letter-spacing: 0.04em;
+    text-align: right;
+    font-size: 10px;
+  }
+
+  .formula-note {
+    font-size: 14px;
+    font-weight: 300;
+    color: var(--text-muted);
+    line-height: 1.7;
+    padding: 16px 20px;
+    background: var(--surface2);
+    border-left: 3px solid var(--accent2);
+    border-radius: 0 8px 8px 0;
+  }
 </style>
 </head>
 <body>
@@ -1634,22 +2639,31 @@
     <nav class="sidebar-nav">
       <div class="nav-section">
         <div class="nav-label">Setup</div>
-        <button class="nav-item active" onclick="showSection('ratio')">
+        <button class="nav-item active" id="nav-ratio-btn" data-label="Ratio" onclick="showSection('ratio')">
           <div class="nav-dot"></div> Ratio Calculator
         </button>
-        <button class="nav-item" onclick="showSection('gear')">
+        <button class="nav-item" id="nav-gear-btn" data-label="Equipment" onclick="showSection('gear')">
           <div class="nav-dot"></div> Equipment
+        </button>
+        <button class="nav-item" id="nav-formulas-btn" data-label="Formulas" onclick="showSection('formulas')">
+          <div class="nav-dot"></div> Method Formulas
         </button>
       </div>
       <div class="nav-section">
         <div class="nav-label">Brew</div>
-        <button class="nav-item" onclick="showSection('steps')">
+        <button class="nav-item" id="nav-steps-btn" data-label="Brew Steps" onclick="showSection('steps')">
           <div class="nav-dot"></div> Brew Steps
         </button>
       </div>
     </nav>
     <div class="sidebar-footer">
       <div class="sidebar-footer-text">HARIO V60 &middot; DRIP METHOD</div>
+      <button class="theme-toggle" id="themeToggleSidebar" onclick="toggleTheme()" title="Toggle light/dark mode">
+        <svg id="themeIconSidebar" viewBox="0 0 20 20" fill="none">
+          <circle cx="10" cy="10" r="3.5" stroke="currentColor" stroke-width="1.5"/>
+          <path d="M10 2v2M10 16v2M2 10h2M16 10h2M4.1 4.1l1.4 1.4M14.5 14.5l1.4 1.4M14.5 5.5l-1.4 1.4M5.5 14.5l-1.4 1.4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+      </button>
     </div>
   </aside>
 
@@ -1673,6 +2687,9 @@
         <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><line x1="1" y1="3" x2="13" y2="3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><line x1="1" y1="7" x2="13" y2="7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><line x1="1" y1="11" x2="13" y2="11" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
         Menu
       </button>
+      <button class="theme-toggle" onclick="toggleTheme()" style="margin-left:8px;" title="Toggle theme">
+        <svg id="themeIconMobile" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="3.5" stroke="currentColor" stroke-width="1.5"/><path d="M10 2v2M10 16v2M2 10h2M16 10h2M4.1 4.1l1.4 1.4M14.5 14.5l1.4 1.4M14.5 5.5l-1.4 1.4M5.5 14.5l-1.4 1.4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+      </button>
     </div>
 
     <!-- MOBILE DRAWER -->
@@ -1681,6 +2698,7 @@
         <div class="nav-label">Setup</div>
         <button class="nav-item active" onclick="showSection('ratio');closeDrawer()"><div class="nav-dot"></div> Ratio Calculator</button>
         <button class="nav-item" onclick="showSection('gear');closeDrawer()"><div class="nav-dot"></div> Equipment</button>
+        <button class="nav-item" onclick="showSection('formulas');closeDrawer()"><div class="nav-dot"></div> Method Formulas</button>
       </div>
       <div class="nav-section">
         <div class="nav-label">Brew</div>
@@ -1733,7 +2751,7 @@
             <div class="result-val" id="resWater">225<span>ml</span></div>
           </div>
           <div class="result-row">
-            <div class="result-key">Bloom Water (2.5x coffee)</div>
+            <div class="result-key">Bloom Water (2× coffee)</div>
             <div class="result-val" id="resBloom">38<span>ml</span></div>
           </div>
           <div class="result-row">
@@ -1856,24 +2874,266 @@
       </div>
     </section>
 
+
+    <!-- ── SECTION: FORMULAS ── -->
+    <section class="section" id="section-formulas">
+      <div class="section-header">
+        <div class="section-eyebrow">Reference</div>
+        <div class="section-title">Method<br>Formulas</div>
+        <p class="section-desc">Quick reference for all four pour-over methods. Verify your recipe before you brew.</p>
+      </div>
+
+      <div class="formula-tabs">
+        <button class="formula-tab active" onclick="showFormula('v60',this)">V60</button>
+        <button class="formula-tab" onclick="showFormula('chemex',this)">Chemex</button>
+        <button class="formula-tab" onclick="showFormula('kalita',this)">Kalita</button>
+        <button class="formula-tab" onclick="showFormula('origami',this)">Origami</button>
+      </div>
+
+      <!-- V60 -->
+      <div class="formula-block active" id="formula-v60">
+        <div class="formula-meta">
+          <span class="formula-badge">Cone · Spiral ribs</span>
+          <span class="formula-difficulty">Intermediate</span>
+        </div>
+        <div class="formula-grid">
+          <div class="formula-stat">
+            <div class="formula-stat-key">Ratio</div>
+            <div class="formula-stat-val">1 : 15</div>
+            <div class="formula-stat-note">Range: 1:14 – 1:17</div>
+          </div>
+          <div class="formula-stat">
+            <div class="formula-stat-key">Water Temp</div>
+            <div class="formula-stat-val">92–96°C</div>
+            <div class="formula-stat-note">Off boil, 30s rest</div>
+          </div>
+          <div class="formula-stat">
+            <div class="formula-stat-key">Grind</div>
+            <div class="formula-stat-val">Med-Fine</div>
+            <div class="formula-stat-note">Like coarse sea salt</div>
+          </div>
+          <div class="formula-stat">
+            <div class="formula-stat-key">Bloom</div>
+            <div class="formula-stat-val">2× coffee</div>
+            <div class="formula-stat-note">e.g. 15g → 30ml</div>
+          </div>
+          <div class="formula-stat">
+            <div class="formula-stat-key">Bloom Time</div>
+            <div class="formula-stat-val">45s total</div>
+            <div class="formula-stat-note">15s pour + 30s rest</div>
+          </div>
+          <div class="formula-stat">
+            <div class="formula-stat-key">Total Time</div>
+            <div class="formula-stat-val">3:00–3:30</div>
+            <div class="formula-stat-note">From first pour</div>
+          </div>
+        </div>
+        <div class="formula-steps-summary">
+          <div class="formula-step-row"><span class="fsr-time">0:00</span><span class="fsr-name">Bloom pour</span><span class="fsr-amount">2× coffee weight</span></div>
+          <div class="formula-step-row"><span class="fsr-time">0:15</span><span class="fsr-name">Bloom rest</span><span class="fsr-amount">wait 30s</span></div>
+          <div class="formula-step-row"><span class="fsr-time">0:45</span><span class="fsr-name">First main pour</span><span class="fsr-amount">to 60% total</span></div>
+          <div class="formula-step-row"><span class="fsr-time">1:15</span><span class="fsr-name">Second main pour</span><span class="fsr-amount">to 100% total</span></div>
+          <div class="formula-step-row"><span class="fsr-time">1:45</span><span class="fsr-name">Rao spin + rest</span><span class="fsr-amount">wait 20s</span></div>
+          <div class="formula-step-row"><span class="fsr-time">2:05</span><span class="fsr-name">Draw down</span><span class="fsr-amount">target done by 3:30</span></div>
+        </div>
+        <div class="formula-note">The V60 rewards precision. The spiral ribs and single hole give full control over flow rate through grind size and pour speed.</div>
+      </div>
+
+      <!-- Chemex -->
+      <div class="formula-block" id="formula-chemex">
+        <div class="formula-meta">
+          <span class="formula-badge">Cone · Thick filter</span>
+          <span class="formula-difficulty">Beginner</span>
+        </div>
+        <div class="formula-grid">
+          <div class="formula-stat">
+            <div class="formula-stat-key">Ratio</div>
+            <div class="formula-stat-val">1 : 16</div>
+            <div class="formula-stat-note">Range: 1:15 – 1:17</div>
+          </div>
+          <div class="formula-stat">
+            <div class="formula-stat-key">Water Temp</div>
+            <div class="formula-stat-val">90–94°C</div>
+            <div class="formula-stat-note">Off boil, 1 min rest</div>
+          </div>
+          <div class="formula-stat">
+            <div class="formula-stat-key">Grind</div>
+            <div class="formula-stat-val">Medium-Coarse</div>
+            <div class="formula-stat-note">Like rough sand</div>
+          </div>
+          <div class="formula-stat">
+            <div class="formula-stat-key">Bloom</div>
+            <div class="formula-stat-val">2.5× coffee</div>
+            <div class="formula-stat-note">e.g. 30g → 75ml</div>
+          </div>
+          <div class="formula-stat">
+            <div class="formula-stat-key">Bloom Time</div>
+            <div class="formula-stat-val">45s total</div>
+            <div class="formula-stat-note">10s pour + 35s rest</div>
+          </div>
+          <div class="formula-stat">
+            <div class="formula-stat-key">Total Time</div>
+            <div class="formula-stat-val">4:00–4:30</div>
+            <div class="formula-stat-note">Thick filter = longer drawdown</div>
+          </div>
+        </div>
+        <div class="formula-steps-summary">
+          <div class="formula-step-row"><span class="fsr-time">0:00</span><span class="fsr-name">Bloom pour + stir</span><span class="fsr-amount">2.5× coffee weight</span></div>
+          <div class="formula-step-row"><span class="fsr-time">0:10</span><span class="fsr-name">Bloom rest</span><span class="fsr-amount">wait 35s</span></div>
+          <div class="formula-step-row"><span class="fsr-time">0:45</span><span class="fsr-name">First main pour</span><span class="fsr-amount">to 60% total</span></div>
+          <div class="formula-step-row"><span class="fsr-time">1:15</span><span class="fsr-name">Second main pour</span><span class="fsr-amount">to 100% total</span></div>
+          <div class="formula-step-row"><span class="fsr-time">1:45</span><span class="fsr-name">Stir + shake</span><span class="fsr-amount">wait 15s</span></div>
+          <div class="formula-step-row"><span class="fsr-time">2:00</span><span class="fsr-name">Draw down</span><span class="fsr-amount">target done by 4:30</span></div>
+        </div>
+        <div class="formula-note">Chemex thick bonded filters produce an exceptionally clean, bright cup. Coarser grind compensates for the restricted flow.</div>
+      </div>
+
+      <!-- Kalita -->
+      <div class="formula-block" id="formula-kalita">
+        <div class="formula-meta">
+          <span class="formula-badge">Flat-bottom · 3 holes</span>
+          <span class="formula-difficulty">Beginner-friendly</span>
+        </div>
+        <div class="formula-grid">
+          <div class="formula-stat">
+            <div class="formula-stat-key">Ratio</div>
+            <div class="formula-stat-val">1 : 15</div>
+            <div class="formula-stat-note">Range: 1:14 – 1:16</div>
+          </div>
+          <div class="formula-stat">
+            <div class="formula-stat-key">Water Temp</div>
+            <div class="formula-stat-val">93–96°C</div>
+            <div class="formula-stat-note">Off boil, 45s rest</div>
+          </div>
+          <div class="formula-stat">
+            <div class="formula-stat-key">Grind</div>
+            <div class="formula-stat-val">Medium</div>
+            <div class="formula-stat-note">Like coarse sand</div>
+          </div>
+          <div class="formula-stat">
+            <div class="formula-stat-key">Bloom</div>
+            <div class="formula-stat-val">2× coffee</div>
+            <div class="formula-stat-note">e.g. 20g → 40ml</div>
+          </div>
+          <div class="formula-stat">
+            <div class="formula-stat-key">Bloom Time</div>
+            <div class="formula-stat-val">45s total</div>
+            <div class="formula-stat-note">15s pour + 30s rest</div>
+          </div>
+          <div class="formula-stat">
+            <div class="formula-stat-key">Total Time</div>
+            <div class="formula-stat-val">3:00–3:30</div>
+            <div class="formula-stat-note">3 pulse pours</div>
+          </div>
+        </div>
+        <div class="formula-steps-summary">
+          <div class="formula-step-row"><span class="fsr-time">0:00</span><span class="fsr-name">Bloom pour</span><span class="fsr-amount">2× coffee weight</span></div>
+          <div class="formula-step-row"><span class="fsr-time">0:15</span><span class="fsr-name">Bloom rest</span><span class="fsr-amount">wait 30s</span></div>
+          <div class="formula-step-row"><span class="fsr-time">0:45</span><span class="fsr-name">First pour</span><span class="fsr-amount">to ~47% total</span></div>
+          <div class="formula-step-row"><span class="fsr-time">1:15</span><span class="fsr-name">Second pour</span><span class="fsr-amount">to ~75% total</span></div>
+          <div class="formula-step-row"><span class="fsr-time">2:00</span><span class="fsr-name">Final pour</span><span class="fsr-amount">to 100% total</span></div>
+          <div class="formula-step-row"><span class="fsr-time">2:30</span><span class="fsr-name">Draw down</span><span class="fsr-amount">target done by 3:30</span></div>
+        </div>
+        <div class="formula-note">The flat bed and 3 metered holes make the Kalita the most forgiving dripper. The 3-pour pulse method keeps extraction balanced across the full bed.</div>
+      </div>
+
+      <!-- Origami -->
+      <div class="formula-block" id="formula-origami">
+        <div class="formula-meta">
+          <span class="formula-badge">Cone · 20 deep ribs</span>
+          <span class="formula-difficulty">Versatile</span>
+        </div>
+        <div class="formula-grid">
+          <div class="formula-stat">
+            <div class="formula-stat-key">Ratio</div>
+            <div class="formula-stat-val">1 : 15</div>
+            <div class="formula-stat-note">Range: 1:14 – 1:16</div>
+          </div>
+          <div class="formula-stat">
+            <div class="formula-stat-key">Water Temp</div>
+            <div class="formula-stat-val">88–93°C</div>
+            <div class="formula-stat-note">Slightly lower than V60</div>
+          </div>
+          <div class="formula-stat">
+            <div class="formula-stat-key">Grind</div>
+            <div class="formula-stat-val">Med-Fine</div>
+            <div class="formula-stat-note">Works with V60 or Kalita filter</div>
+          </div>
+          <div class="formula-stat">
+            <div class="formula-stat-key">Bloom</div>
+            <div class="formula-stat-val">3× coffee</div>
+            <div class="formula-stat-note">e.g. 15g → 45ml</div>
+          </div>
+          <div class="formula-stat">
+            <div class="formula-stat-key">Bloom Time</div>
+            <div class="formula-stat-val">45s total</div>
+            <div class="formula-stat-note">15s pour + 30s rest</div>
+          </div>
+          <div class="formula-stat">
+            <div class="formula-stat-key">Total Time</div>
+            <div class="formula-stat-val">2:45–3:15</div>
+            <div class="formula-stat-note">Fast drawdown from deep ribs</div>
+          </div>
+        </div>
+        <div class="formula-steps-summary">
+          <div class="formula-step-row"><span class="fsr-time">0:00</span><span class="fsr-name">Bloom pour</span><span class="fsr-amount">3× coffee weight</span></div>
+          <div class="formula-step-row"><span class="fsr-time">0:15</span><span class="fsr-name">Bloom rest</span><span class="fsr-amount">wait 30s</span></div>
+          <div class="formula-step-row"><span class="fsr-time">0:45</span><span class="fsr-name">First main pour</span><span class="fsr-amount">to 55% total</span></div>
+          <div class="formula-step-row"><span class="fsr-time">1:30</span><span class="fsr-name">Second main pour</span><span class="fsr-amount">to 100% total</span></div>
+          <div class="formula-step-row"><span class="fsr-time">2:00</span><span class="fsr-name">Swirl + draw down</span><span class="fsr-amount">target done by 3:15</span></div>
+        </div>
+        <div class="formula-note">The Origami's 20 deep ribs promote maximum airflow, making it the most versatile dripper. Use V60 filter for more clarity, Kalita filter for more body.</div>
+      </div>
+
+    </section>
   </main>
+
+  <!-- ── DESKTOP BREW PANEL (3rd grid col, desktop only) ── -->
+  <div id="brew-panel-desktop">
+    <div class="brew-panel-inner">
+      <div class="brew-panel-header">
+        <div>
+          <div class="brew-panel-eyebrow">Brew Guide · V60 Method</div>
+          <div class="brew-panel-title">Pour<br>Over</div>
+        </div>
+        <div class="brew-panel-right">
+          <div class="brew-bar">
+            <div class="brew-bar-meta">
+              <div class="brew-total">Recipe: <strong id="stepsRecipeLabelDesktop">15g / 225ml</strong></div>
+              <button class="brew-reset-link" onclick="resetBrew()" id="resetLinkDesktop" style="display:none">Reset</button>
+            </div>
+            <div class="brew-bar-main">
+              <div class="master-elapsed" id="masterElapsedDesktop">0:00</div>
+              <button class="master-btn" id="masterBtnDesktop" onclick="handleMaster()" style="display:none">
+                <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M3 2.5L11 7L3 11.5V2.5Z" fill="currentColor"/></svg>
+                <span id="masterBtnLabelDesktop">Start Brew</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="drain-hold" id="drainHoldDesktop">
+        <svg class="drain-hold-icon" viewBox="0 0 32 32" fill="none">
+          <path d="M7 10 L16 26 L25 10" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+          <line x1="5" y1="10" x2="27" y2="10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+          <path d="M16 28 Q14.5 30.5 16 31.5 Q17.5 30.5 16 28Z" fill="currentColor" opacity="0.7"/>
+        </svg>
+        <div class="drain-hold-text">
+          <div class="drain-hold-title">Waiting for filter to drain</div>
+          <div class="drain-hold-sub">Resume when cup has space</div>
+        </div>
+        <div class="drain-hold-dot"></div>
+      </div>
+
+      <div class="steps-container" id="stepsContainerDesktop"></div>
+    </div>
+  </div>
+
 </div>
 
 <!-- ── MOBILE BOTTOM NAV ── -->
-<nav class="mobile-nav">
-  <button class="mob-nav-btn active" id="mobnav-ratio" onclick="showSection('ratio')">
-    <svg viewBox="0 0 20 20" fill="none"><circle cx="7" cy="7" r="3" stroke="currentColor" stroke-width="1.4"/><circle cx="13" cy="13" r="3" stroke="currentColor" stroke-width="1.4"/><line x1="3" y1="17" x2="17" y2="3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
-    <div class="mob-nav-label">Ratio</div>
-  </button>
-  <button class="mob-nav-btn" id="mobnav-gear" onclick="showSection('gear')">
-    <svg viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="3" stroke="currentColor" stroke-width="1.4"/><path d="M10 2v2M10 16v2M2 10h2M16 10h2M4.1 4.1l1.4 1.4M14.5 14.5l1.4 1.4M14.5 5.5l-1.4 1.4M5.5 14.5l-1.4 1.4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
-    <div class="mob-nav-label">Gear</div>
-  </button>
-  <button class="mob-nav-btn" id="mobnav-steps" onclick="showSection('steps')">
-    <svg viewBox="0 0 20 20" fill="none"><path d="M3 5h14M3 10h14M3 15h8" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
-    <div class="mob-nav-label">Brew</div>
-  </button>
-</nav>
+
 
 <script>
 // ─────────────────────────────────────────────
@@ -1882,6 +3142,7 @@
 let currentRatio = 15;
 let coffeeG = 15;
 let waterMl = 225;
+let currentMethod = 'v60'; // 'v60' | 'chemex' | 'kalita' | 'origami'
 let stepTimers = {};
 
 // Master brew clock state
@@ -1902,116 +3163,130 @@ let brewFinished = false;
 //  BREW STEPS DEFINITION
 // ─────────────────────────────────────────────
 function getSteps(coffee, water) {
-  const bloom = Math.round(coffee * 2.5);
-  const pour1 = Math.round(water * 0.55);
-  const pour2 = water;
+  if (currentMethod === 'chemex') return getStepsChemex(coffee, water);
+  if (currentMethod === 'kalita') return getStepsKalita(coffee, water);
+  if (currentMethod === 'origami') return getStepsOrigami(coffee, water);
+  return getStepsV60(coffee, water);
+}
 
+function getStepsV60(coffee, water) {
+  const bloom = Math.round(coffee * 2);
+  const pour1 = Math.round(water * 0.60);
+  const pour2 = water;
   return [
-    {
-      title: 'Rinse & Preheat',
-      timing: 'Before brew',
-      duration: 0,
-      isManual: true,
-      isWait: false,
-      instructions: [
-        'Place paper filter in V60, set over server.',
-        'Rinse filter with hot water to remove paper taste.',
-        'Discard rinse water, add ' + coffee + 'g freshly ground coffee.',
-        'Level the grounds gently.',
-      ],
-      note: 'Rinsing also preheats your server and V60.',
-      waterTarget: null,
-      waterFrom: 0, waterTo: 0,
-    },
-    {
-      title: 'Bloom — Pour',
-      timing: '0:00 – 0:15',
-      duration: 15,
-      isManual: false,
-      isWait: false,
-      instructions: [
-        'Pour ' + bloom + 'ml water — about 2.5× coffee weight.',
-        'Wet all grounds evenly from center outward.',
-      ],
-      note: 'Pour in a slow spiral from center outward.',
-      waterTarget: { current: bloom, total: water },
-      waterFrom: 0, waterTo: bloom,
-    },
-    {
-      title: 'Bloom — Rest',
-      timing: '0:15 – 0:45',
-      duration: 30,
-      isManual: false,
-      isWait: true,
-      instructions: [
-        'Stop pouring. Set kettle down.',
-        'Watch the grounds bubble and swell.',
-        'Wait for CO2 to release fully.',
-      ],
-      note: 'Longer bloom = more CO2 released = more even extraction.',
-      waterTarget: null,
-      waterFrom: bloom, waterTo: bloom,
-    },
-    {
-      title: 'Main Pour — 1',
-      timing: '0:45 – 1:15',
-      duration: 30,
-      isManual: false,
-      isWait: false,
-      instructions: [
-        'Pour slowly in small circles from center outward.',
-        'Bring total water to ' + pour1 + 'ml.',
-        'Keep the stream steady and gentle.',
-      ],
-      note: 'Avoid pouring directly on the filter wall.',
-      waterTarget: { current: pour1, total: water },
-      waterFrom: bloom, waterTo: pour1,
-    },
-    {
-      title: 'Rest — 1',
-      timing: '1:15 – 1:30',
-      duration: 15,
-      isManual: false,
-      isWait: true,
-      instructions: [
-        'Stop pouring. Let water settle.',
-        'Allow bed to drain slightly before next pour.',
-      ],
-      note: 'Brief pause improves even saturation.',
-      waterTarget: null,
-      waterFrom: pour1, waterTo: pour1,
-    },
-    {
-      title: 'Main Pour — 2',
-      timing: '1:30 – 2:00',
-      duration: 30,
-      isManual: false,
-      isWait: false,
-      instructions: [
-        'Continue pouring in slow circles.',
-        'Bring total water to ' + pour2 + 'ml.',
-      ],
-      note: 'Avoid pouring directly on the filter paper.',
-      waterTarget: { current: pour2, total: water },
-      waterFrom: pour1, waterTo: pour2,
-    },
-    {
-      title: 'Draw Down',
-      timing: '2:00 – 3:00+',
-      duration: 90,
-      isManual: false,
-      isWait: true,
-      instructions: [
-        'Give the dripper a gentle swirl.',
-        'Let the water draw down completely.',
-        'Remove dripper when bed is dry.',
-      ],
-      note: 'Target total brew time: 2:30 – 3:00 min.',
-      waterTarget: null,
-      waterFrom: 0, waterTo: 0,
-    },
+    { title:'Rinse & Preheat', timing:'Before brew', duration:0, isManual:true, isWait:false,
+      instructions:['Place paper filter in V60, set over server.','Rinse filter thoroughly with hot water — removes paper taste and preheats.','Discard rinse water, add '+coffee+'g freshly ground coffee.','Gently shake to level the grounds.'],
+      note:'Water temp: 92–96 °C. Grind: medium-fine, like coarse salt.', waterTarget:null, waterFrom:0, waterTo:0 },
+    { title:'Bloom — Pour & Swirl', timing:'0:00 – 0:15', duration:15, isManual:false, isWait:false,
+      instructions:['Start timer. Pour '+bloom+'ml water (2× coffee weight).','Spiral from center outward — saturate all grounds.','Immediately swirl the V60 gently to mix evenly.'],
+      note:'Swirling ensures even saturation without pushing fines into the filter.', waterTarget:{current:bloom,total:water}, waterFrom:0, waterTo:bloom },
+    { title:'Bloom — Rest', timing:'0:15 – 0:45', duration:30, isManual:false, isWait:true,
+      instructions:['Set kettle down. Do not pour.','Watch the grounds swell and bubble — CO2 releasing.','Fresh coffee blooms a lot. Stale coffee barely moves.'],
+      note:'45s total bloom. Returns diminish beyond that.', waterTarget:null, waterFrom:bloom, waterTo:bloom },
+    { title:'First Main Pour', timing:'0:45 – 1:15', duration:30, isManual:false, isWait:false,
+      instructions:['Pour in steady concentric circles from center outward.','Target: reach '+pour1+'ml total by 1:15.','Pour with some agitation — keep the slurry turbulent.'],
+      note:'Hit 60% of total water in 30s.', waterTarget:{current:pour1,total:water}, waterFrom:bloom, waterTo:pour1 },
+    { title:'Second Main Pour', timing:'1:15 – 1:45', duration:30, isManual:false, isWait:false,
+      instructions:['Pour slower and more gently this time.','Keep the cone topped up — don\'t let the level drop too low.','Target: reach '+pour2+'ml total by 1:45.'],
+      note:'Keeping the cone full maintains temperature for even extraction.', waterTarget:{current:pour2,total:water}, waterFrom:pour1, waterTo:pour2 },
+    { title:'Stir & Swirl', timing:'1:45 – 2:05', duration:20, isManual:false, isWait:true,
+      instructions:['Stir gently clockwise then counter-clockwise.','Lift V60 + server and give one gentle swirl (the "Rao spin").','Goal: a flat, even coffee bed for uniform drawdown.'],
+      note:'The Rao spin prevents channeling — the #1 cause of uneven extraction.', waterTarget:null, waterFrom:pour2, waterTo:pour2 },
+    { title:'Draw Down', timing:'2:05 – 3:30', duration:85, isManual:false, isWait:true,
+      instructions:['Do nothing. Let gravity do the work.','The bed should drain fully and look flat and even.','Remove the dripper when dripping stops.'],
+      note:'Target total time: 3:00–3:30. Faster = coarser grind. Slower = finer grind.', waterTarget:null, waterFrom:0, waterTo:0 },
   ];
 }
+
+function getStepsChemex(coffee, water) {
+  // James Hoffmann Chemex method — 1:16 default, 4:00–4:30 total
+  const bloom = Math.round(coffee * 2.5); // 60–90g for 30g, ~2.5×
+  const pour1 = Math.round(water * 0.60); // to 60% by 1:15
+  const pour2 = water;
+  return [
+    { title:'Rinse & Preheat', timing:'Before brew', duration:0, isManual:true, isWait:false,
+      instructions:['Fold Chemex filter with 3 layers toward the spout, place in Chemex.','Rinse thoroughly with hot water — removes paper taste, preheats vessel.','Discard rinse water, add '+coffee+'g medium-fine ground coffee.','Create a small divot in the center of the grounds.'],
+      note:'Water temp: 94–96 °C. Grind: medium-fine — slightly coarser than V60 due to thick filter.', waterTarget:null, waterFrom:0, waterTo:0 },
+    { title:'Bloom — Pour & Stir', timing:'0:00 – 0:10', duration:10, isManual:false, isWait:false,
+      instructions:['Start timer. Pour '+bloom+'g water in gentle circles.','Make sure to saturate all the coffee.','Stir briefly to wet any dry patches.'],
+      note:'Chemex uses a heavier bloom than V60 — thick filter needs more wetting.', waterTarget:{current:bloom,total:water}, waterFrom:0, waterTo:bloom },
+    { title:'Bloom — Rest', timing:'0:10 – 0:45', duration:35, isManual:false, isWait:true,
+      instructions:['Set kettle down. Do not pour.','Watch the grounds bloom — CO2 releasing through the thick filter.','Bloom is complete when bubbling slows.'],
+      note:'35s rest. Chemex needs a longer bloom than V60 due to its dense filter paper.', waterTarget:null, waterFrom:bloom, waterTo:bloom },
+    { title:'First Main Pour', timing:'0:45 – 1:15', duration:30, isManual:false, isWait:false,
+      instructions:['Pour in slow circular motion from center outward.','Target: reach '+pour1+'g total by 1:15.','Break up any dry clumps as you pour.'],
+      note:'Keep pouring steady — Chemex filter is thick so flow will be slower.', waterTarget:{current:pour1,total:water}, waterFrom:bloom, waterTo:pour1 },
+    { title:'Second Main Pour', timing:'1:15 – 1:45', duration:30, isManual:false, isWait:false,
+      instructions:['Continue pouring gently to reach '+pour2+'g total.','Pour in slow concentric circles, avoiding the filter walls.','Finish pouring by 1:45.'],
+      note:'Chemex filters are thick — the drawdown will take longer than V60.', waterTarget:{current:pour2,total:water}, waterFrom:pour1, waterTo:pour2 },
+    { title:'Stir & Shake', timing:'1:45 – 2:00', duration:15, isManual:false, isWait:true,
+      instructions:['Stir once clockwise and once counter-clockwise with a spoon.','Give the Chemex a gentle shake to flatten the coffee bed.','This ensures even extraction through the wide flat bed.'],
+      note:'The Chemex shake replaces the Rao spin — the wide base responds better to horizontal movement.', waterTarget:null, waterFrom:pour2, waterTo:pour2 },
+    { title:'Draw Down', timing:'2:00 – 4:30', duration:150, isManual:false, isWait:true,
+      instructions:['Do not touch. Let it drain completely.','The thick Chemex filter means a longer drawdown than V60.','Remove filter when dripping completely stops.'],
+      note:'Target total time: 4:00–4:30. Faster = finer grind. Slower = coarser grind.', waterTarget:null, waterFrom:0, waterTo:0 },
+  ];
+}
+
+function getStepsKalita(coffee, water) {
+  // Kalita Wave — flat bottom, 3 holes, pulse pour method, 1:15–1:16, 3:00–3:30
+  const bloom = Math.round(coffee * 2); // 2× dose for bloom
+  const pour1 = Math.round(water * 0.47); // to ~47% by 1:15
+  const pour2 = Math.round(water * 0.75); // to ~75% by 2:00
+  const pour3 = water;
+  return [
+    { title:'Rinse & Preheat', timing:'Before brew', duration:0, isManual:true, isWait:false,
+      instructions:['Place Kalita Wave filter in dripper — do not flatten the ridges.','Rinse filter with hot water, discard.','Add '+coffee+'g medium ground coffee.','Gently shake to level the flat bed.'],
+      note:'Water temp: 93–96 °C. Grind: medium, like sea salt. The flat bed means more forgiving technique.', waterTarget:null, waterFrom:0, waterTo:0 },
+    { title:'Bloom', timing:'0:00 – 0:15', duration:15, isManual:false, isWait:false,
+      instructions:['Start timer. Pour '+bloom+'g water evenly over all grounds.','Pour in slow circles — the flat bed distributes water well.','All grounds should be evenly saturated.'],
+      note:'Kalita\'s flat bottom and 3 holes give even saturation — easier than V60.', waterTarget:{current:bloom,total:water}, waterFrom:0, waterTo:bloom },
+    { title:'Bloom — Rest', timing:'0:15 – 0:45', duration:30, isManual:false, isWait:true,
+      instructions:['Wait for CO2 to fully release.','The flat bed means more even blooming than a cone.'],
+      note:'30–45s bloom. The Kalita is more forgiving if bloom is slightly longer.', waterTarget:null, waterFrom:bloom, waterTo:bloom },
+    { title:'First Pour', timing:'0:45 – 1:15', duration:30, isManual:false, isWait:false,
+      instructions:['Pour slowly in concentric circles from center outward.','Target: reach '+pour1+'g by 1:15.','Keep the level steady — don\'t let it drop too low.'],
+      note:'Kalita\'s 3 holes meter the flow — no need to rush.', waterTarget:{current:pour1,total:water}, waterFrom:bloom, waterTo:pour1 },
+    { title:'Second Pour', timing:'1:15 – 2:00', duration:45, isManual:false, isWait:false,
+      instructions:['Continue pouring in slow circles.','Target: reach '+pour2+'g by 2:00.','Maintain a steady, gentle pour — avoid turbulence.'],
+      note:'The flat bed and 3 holes keep extraction even across the whole bed.', waterTarget:{current:pour2,total:water}, waterFrom:pour1, waterTo:pour2 },
+    { title:'Final Pour', timing:'2:00 – 2:30', duration:30, isManual:false, isWait:false,
+      instructions:['Pour remaining water to reach '+pour3+'g total.','Finish by 2:30.','Pour gently — preserve the flat bed structure.'],
+      note:'Three pours keep the Kalita bed agitated evenly — the key to its balanced extraction.', waterTarget:{current:pour3,total:water}, waterFrom:pour2, waterTo:pour3 },
+    { title:'Draw Down', timing:'2:30 – 3:30', duration:60, isManual:false, isWait:true,
+      instructions:['Let the flat bed drain completely through the 3 holes.','Do not stir or swirl — the Kalita does the work.','Remove dripper when dripping stops.'],
+      note:'Target total time: 3:00–3:30. Faster = finer grind. Slower = coarser grind.', waterTarget:null, waterFrom:0, waterTo:0 },
+  ];
+}
+
+function getStepsOrigami(coffee, water) {
+  // Origami dripper — cone shape, 20 ribs, works with V60 or Kalita filter
+  // Based on Equator Coffees + Dripcult recipes — 1:15–1:16, 3:00 total
+  const bloom = Math.round(coffee * 3); // ~3× for Origami (50–60g for 15–20g)
+  const pour1 = Math.round(water * 0.55); // to 55% by 1:15
+  const pour2 = water;
+  return [
+    { title:'Rinse & Preheat', timing:'Before brew', duration:0, isManual:true, isWait:false,
+      instructions:['Place V60 or Kalita Wave filter in Origami dripper.','Rinse filter with hot water, discard.','Add '+coffee+'g medium-fine ground coffee.','Shake gently to create a flat, level bed.'],
+      note:'Water temp: 88–93 °C — slightly lower than V60. Grind: medium-fine. Origami is very versatile.', waterTarget:null, waterFrom:0, waterTo:0 },
+    { title:'Bloom', timing:'0:00 – 0:15', duration:15, isManual:false, isWait:false,
+      instructions:['Start timer. Pour '+bloom+'g water from center outward.','The 20-rib design promotes even saturation.','Stir or spin gently to ensure all grounds are wet — cone filters can miss edges.'],
+      note:'Origami\'s deep ribs create excellent airflow — bloom will be vigorous with fresh coffee.', waterTarget:{current:bloom,total:water}, waterFrom:0, waterTo:bloom },
+    { title:'Bloom — Rest', timing:'0:15 – 0:45', duration:30, isManual:false, isWait:true,
+      instructions:['Wait. Watch the grounds swell.','The 20-rib cone releases CO2 freely and efficiently.'],
+      note:'30s rest. Origami blooms faster than Chemex but similar to V60.', waterTarget:null, waterFrom:bloom, waterTo:bloom },
+    { title:'First Main Pour', timing:'0:45 – 1:30', duration:45, isManual:false, isWait:false,
+      instructions:['Pour slowly from center, spiraling outward.','Target: reach '+pour1+'g by 1:30.','Avoid pouring directly on the filter walls — the ribs hold the filter away but be gentle.'],
+      note:'Origami flows faster than Chemex — keep your pour rate steady to control extraction.', waterTarget:{current:pour1,total:water}, waterFrom:bloom, waterTo:pour1 },
+    { title:'Second Main Pour', timing:'1:30 – 2:00', duration:30, isManual:false, isWait:false,
+      instructions:['Pour remaining water to reach '+pour2+'g total.','Pour in slow concentric circles.','Finish pouring by 2:00.'],
+      note:'Origami is the most versatile dripper — V60 filter gives clarity, Kalita filter gives body.', waterTarget:{current:pour2,total:water}, waterFrom:pour1, waterTo:pour2 },
+    { title:'Swirl & Draw Down', timing:'2:00 – 3:00', duration:60, isManual:false, isWait:true,
+      instructions:['Give the Origami + server a gentle swirl to flatten the coffee bed.','Let it drain fully — do not touch.','Remove dripper when dripping stops.'],
+      note:'Target total time: 3:00. Origami drains faster than Chemex, similar to V60.', waterTarget:null, waterFrom:0, waterTo:0 },
+  ];
+}
+
 
 // ─────────────────────────────────────────────
 //  RATIO / CALC
@@ -2049,8 +3324,12 @@ function calcFromWater() {
 function updateResults() {
   document.getElementById('resCoffee').innerHTML = coffeeG + '<span>g</span>';
   document.getElementById('resWater').innerHTML = waterMl + '<span>ml</span>';
-  document.getElementById('resBloom').innerHTML = Math.round(coffeeG * 2.5) + '<span>ml</span>';
-  const t = coffeeG <= 15 ? '2:30 – 3:00' : '2:30 – 3:30';
+  const bloom = currentMethod === 'chemex' ? Math.round(coffeeG*2.5) :
+                currentMethod === 'origami' ? Math.round(coffeeG*3) :
+                Math.round(coffeeG*2);
+  document.getElementById('resBloom').innerHTML = bloom + '<span>ml</span>';
+  const t = currentMethod === 'chemex' ? '4:00 – 4:30' :
+            currentMethod === 'origami' ? '2:45 – 3:15' : '3:00 – 3:30';
   document.getElementById('resTime').innerHTML = t + '<span>min</span>';
 }
 
@@ -2060,7 +3339,6 @@ function updateResults() {
 function showSection(name) {
   document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-  document.querySelectorAll('.mob-nav-btn').forEach(n => n.classList.remove('active'));
 
   document.getElementById('section-' + name).classList.add('active');
 
@@ -2075,10 +3353,11 @@ function showSection(name) {
   }
 
   document.querySelectorAll('.nav-item').forEach(n => {
-    if (n.textContent.trim().toLowerCase().includes(
-      name === 'ratio' ? 'ratio' : name === 'gear' ? 'equip' : 'brew')) {
-      n.classList.add('active');
-    }
+    const t = n.textContent.trim().toLowerCase();
+    if (name === 'ratio' && t.includes('ratio')) n.classList.add('active');
+    else if (name === 'gear' && t.includes('equip')) n.classList.add('active');
+    else if (name === 'formulas' && t.includes('formula')) n.classList.add('active');
+    else if (name === 'steps' && t.includes('brew')) n.classList.add('active');
   });
 
   const mnb = document.getElementById('mobnav-' + name);
@@ -2340,8 +3619,26 @@ function activateTimedStep(stepIdx) {
   if (card) {
     card.classList.remove('locked', 'done');
     card.classList.add('current');
-    card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    // Mobile: scroll the source card into view
+    const isDesktop = window.matchMedia('(min-width: 901px)').matches;
+    if (!isDesktop) {
+      card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
   }
+
+  // Desktop: scroll after syncDesktopSteps mirrors the DOM (slight delay)
+  setTimeout(() => {
+    const panel = document.getElementById('brew-panel-desktop');
+    if (panel) {
+      const dCard = document.querySelector('#stepsContainerDesktop .step-card.current');
+      if (dCard) {
+        const panelRect = panel.getBoundingClientRect();
+        const cardRect = dCard.getBoundingClientRect();
+        const offset = cardRect.top - panelRect.top - 120;
+        panel.scrollBy({ top: offset, behavior: 'smooth' });
+      }
+    }
+  }, 120);
 
   // Set ring color for wait vs pour
   const prog = document.getElementById('prog-' + stepIdx);
@@ -2610,6 +3907,289 @@ if (screen.orientation && screen.orientation.lock) {
 
 </script>
 
+<script>
+// ══════════════════════════════════════════════
+//  THEME
+// ══════════════════════════════════════════════
+const SUN_SVG = `<circle cx="10" cy="10" r="3.5" stroke="currentColor" stroke-width="1.5"/><path d="M10 2v2M10 16v2M2 10h2M16 10h2M4.1 4.1l1.4 1.4M14.5 14.5l1.4 1.4M14.5 5.5l-1.4 1.4M5.5 14.5l-1.4 1.4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>`;
+const MOON_SVG = `<path d="M15 10.5A6.5 6.5 0 0 1 8.5 4a6.5 6.5 0 1 0 6.5 6.5z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>`;
+function applyTheme(t){document.documentElement.setAttribute('data-theme',t);localStorage.setItem('v60-theme',t);const d=t==='dark';document.querySelectorAll('#themeIcon,#themeIconMobile,#themeIconSidebar').forEach(e=>{e.innerHTML=d?SUN_SVG:MOON_SVG;});const m=document.querySelector('meta[name="theme-color"]');if(m)m.setAttribute('content',d?'#131110':'#faf8f5');}
+function toggleTheme(){const c=document.documentElement.getAttribute('data-theme')||'dark';applyTheme(c==='dark'?'light':'dark');}
+(function(){const s=localStorage.getItem('v60-theme');if(s){applyTheme(s);return;}applyTheme(window.matchMedia('(min-width:901px)').matches?'dark':'light');})();
+
+// ══════════════════════════════════════════════
+//  GEAR POPOVER
+// ══════════════════════════════════════════════
+function toggleDtGear(){const p=document.getElementById('dtGearPanel'),b=document.getElementById('dtBackdrop'),btn=document.getElementById('dtGearBtn'),o=p.classList.toggle('open');b.classList.toggle('open',o);btn.classList.toggle('open',o);}
+function closeDtGear(){['dtGearPanel','dtBackdrop'].forEach(id=>document.getElementById(id).classList.remove('open'));document.getElementById('dtGearBtn').classList.remove('open');}
+
+// ══════════════════════════════════════════════
+//  DESKTOP RATIO
+// ══════════════════════════════════════════════
+function dtUpdatePills(){
+  const bloom = currentMethod === 'chemex' ? Math.round(coffeeG*2.5) :
+                currentMethod === 'origami' ? Math.round(coffeeG*3) :
+                Math.round(coffeeG*2);
+  const time = currentMethod === 'chemex' ? '4:00–4:30' :
+               currentMethod === 'kalita' ? '3:00–3:30' :
+               currentMethod === 'origami' ? '2:45–3:15' : '3:00–3:30';
+  document.getElementById('dtBloom').textContent=bloom+'ml';
+  document.getElementById('dtTime').textContent=time;
+  document.getElementById('dtRecipeLabel').textContent=coffeeG+'g / '+waterMl+'ml';
+  // sync left panel
+  const pc=document.getElementById('dtPanelCoffee');if(pc)pc.textContent=coffeeG;
+  const pw=document.getElementById('dtPanelWater');if(pw)pw.textContent=waterMl;
+  const pr=document.getElementById('dtPanelRatio');if(pr)pr.textContent='1:'+currentRatio;
+  const pb=document.getElementById('dtPanelBloom');if(pb)pb.textContent=bloom+' ml';
+  const pt=document.getElementById('dtPanelTarget');if(pt)pt.textContent=time;
+  const pwt=document.getElementById('dtPanelWaterTotal');if(pwt)pwt.textContent='/ '+waterMl+' ml';
+  // sync right panel temp + grind + gear by method
+  const tempMap={v60:{temp:'92–96',note:'Off boil · 30 sec rest',grind:'Med-Fine',tip:'Like coarse sea salt. Adjust coarser if draining in &lt;2:30, finer if slower than 4:00.',dripper:'Hario V60 dripper'},chemex:{temp:'90–94',note:'Off boil · 1 min rest',grind:'Medium-Coarse',tip:'Like rough sand. Thicker paper needs coarser grind. Aim for full drawdown in 4–4:30.',dripper:'Chemex brewer'},kalita:{temp:'90–95',note:'Off boil · 45 sec rest',grind:'Medium',tip:'Like coarse sand. Flat-bottom design is forgiving — keep a steady, consistent pour.',dripper:'Kalita Wave dripper'},origami:{temp:'88–93',note:'Off boil · 45 sec rest',grind:'Med-Fine',tip:'Origami is versatile. Deep ribs promote even airflow — bloom will be vigorous with fresh coffee.',dripper:'Origami dripper'}};
+  const m=tempMap[currentMethod]||tempMap.v60;
+  const tempEl=document.getElementById('dtPanelTemp');if(tempEl)tempEl.textContent=m.temp;
+  const tempNote=document.getElementById('dtPanelTempNote');if(tempNote)tempNote.textContent=m.note;
+  const grindLbl=document.getElementById('dtGrindLabel');if(grindLbl)grindLbl.textContent=m.grind;
+  const grindTip=document.getElementById('dtGrindTip');if(grindTip)grindTip.innerHTML=m.tip;
+  const dripper=document.getElementById('dtGearDripper');if(dripper)dripper.textContent=m.dripper;
+  // tip by method
+  const tipMap={v60:{title:'Spiral pour',body:'Pour in slow spirals from center outward. Avoid pouring directly on the filter walls.'},chemex:{title:'Slow & even',body:'Chemex paper is thick — keep the pour slow. A longer 4-minute brew extracts cleanly.'},kalita:{title:'Stay centered',body:'Keep your pour above the center hole. The flat base creates even extraction across all grounds.'},origami:{title:'Spin technique',body:'After bloom, gently swirl the dripper to even the grounds. The deep ribs handle any filter type.'}};
+  const tp=tipMap[currentMethod]||tipMap.v60;
+  const tpTitle=document.getElementById('dtProTipTitle');if(tpTitle)tpTitle.textContent=tp.title;
+  const tpBody=document.getElementById('dtProTipBody');if(tpBody)tpBody.textContent=tp.body;
+  // grind visual bars: highlight position 3–5 (0-indexed) for med-fine, 5–7 for coarser
+  const grindPos={v60:[3,4,5],chemex:[5,6,7],kalita:[4,5,6],origami:[3,4,5]};
+  const active=grindPos[currentMethod]||[3,4,5];
+  document.querySelectorAll('.dt-grind-bar').forEach((b,i)=>b.classList.toggle('active',active.includes(i)));
+}
+
+const METHOD_META = {
+  v60:    { eyebrow:'Brew Guide · V60 Pour Over',    title:'Pour<br>Over' },
+  chemex: { eyebrow:'Brew Guide · Chemex',            title:'Chemex' },
+  kalita: { eyebrow:'Brew Guide · Kalita Wave',       title:'Kalita<br>Wave' },
+  origami:{ eyebrow:'Brew Guide · Origami Dripper',   title:'Origami' },
+};
+
+function dtSetMethod(m, el) {
+  if (brewRunning || brewPaused || brewStarted) {
+    if (!confirm('Switching method will reset the brew. Continue?')) return;
+    resetBrew();
+  }
+  currentMethod = m;
+  document.querySelectorAll('.dt-method-btn').forEach(b => b.classList.toggle('active', b.dataset.method === m));
+  const meta = METHOD_META[m];
+  const ey = document.getElementById('dtBrewEyebrow');
+  const ti = document.getElementById('dtBrewTitle');
+  if (ey) ey.textContent = meta.eyebrow;
+  if (ti) ti.innerHTML = meta.title;
+  dtUpdatePills();
+  dtRenderSteps();
+}
+function dtSetRatio(r,el){
+  currentRatio=r;
+  waterMl=Math.round(coffeeG*currentRatio);
+  document.querySelectorAll('.dt-ratio-btn').forEach(b=>b.classList.toggle('active',parseInt(b.dataset.ratio)===r));
+  document.querySelectorAll('.ratio-btn').forEach(b=>b.classList.toggle('active',parseInt(b.dataset.ratio)===r));
+  document.getElementById('dtCoffeeInput').value=coffeeG;
+  document.getElementById('dtWaterInput').value=waterMl;
+  document.getElementById('coffeeInput').value=coffeeG;
+  document.getElementById('waterInput').value=waterMl;
+  updateResults();dtUpdatePills();dtRenderSteps();savePrefs();
+}
+function dtCalcFromCoffee(){
+  const v=parseFloat(document.getElementById('dtCoffeeInput').value);if(!v||v<=0)return;
+  coffeeG=Math.round(v);waterMl=Math.round(coffeeG*currentRatio);
+  document.getElementById('dtWaterInput').value=waterMl;
+  document.getElementById('coffeeInput').value=coffeeG;
+  document.getElementById('waterInput').value=waterMl;
+  updateResults();dtUpdatePills();dtRenderSteps();
+}
+function dtCalcFromWater(){
+  const v=parseFloat(document.getElementById('dtWaterInput').value);if(!v||v<=0)return;
+  waterMl=Math.round(v);coffeeG=Math.round(waterMl/currentRatio);
+  document.getElementById('dtCoffeeInput').value=coffeeG;
+  document.getElementById('coffeeInput').value=coffeeG;
+  document.getElementById('waterInput').value=waterMl;
+  updateResults();dtUpdatePills();dtRenderSteps();
+}
+
+// ══════════════════════════════════════════════
+//  DESKTOP STEP RENDERER
+// ══════════════════════════════════════════════
+function dtRenderSteps(){
+  const steps=getSteps(coffeeG,waterMl);
+  const container=document.getElementById('dtSteps');
+  if(!container)return;
+  container.innerHTML='';
+  const circ=2*Math.PI*30;
+  steps.forEach((step,i)=>{
+    const card=document.createElement('div');
+    card.className='dt-step'+(i===0?'':' locked');
+    card.id='dt-step-'+i;
+    const bc=step.isManual?'manual':step.isWait?'wait':'pour';
+    const bt=step.isManual?'Manual':step.isWait?'Wait':'Pour';
+    const timer=(!step.isManual&&step.duration>0)?`<div class="dt-step-timer"><svg width="44" height="44" viewBox="0 0 70 70"><circle cx="35" cy="35" r="30" fill="none" stroke="var(--border)" stroke-width="3"/><circle id="dt-prog-${i}" cx="35" cy="35" r="30" fill="none" stroke="${step.isWait?'var(--green)':'var(--accent)'}" stroke-width="3" stroke-linecap="round" stroke-dasharray="${circ}" stroke-dashoffset="0" transform="rotate(-90 35 35)"/><text x="35" y="40" text-anchor="middle" font-family="var(--mono)" font-size="14" fill="var(--text-muted)" id="dt-tc-${i}">${step.duration}s</text></svg></div>`:'';
+    const instr=step.instructions.map((t,n)=>`<li data-n="0${n+1}">${t}</li>`).join('');
+    const wb=(step.waterTo>step.waterFrom)?`<div class="dt-water-bar" id="dt-wb-${i}"><div class="dt-water-track"><div class="dt-water-fill" id="dt-wf-${i}"></div></div><div class="dt-water-label"><span class="dt-water-current" id="dt-wv-${i}">${step.waterFrom}ml</span><span>${step.waterTo}ml / ${waterMl}ml total</span></div></div>`:'';
+    const cbtn=step.isManual?`<button class="dt-card-btn" id="dt-cbtn-${i}" onclick="dtManualDone(${i})"><svg width="12" height="12" viewBox="0 0 14 14" fill="none"><path d="M3 2.5L11 7L3 11.5V2.5Z" fill="currentColor"/></svg>Done — Start Brew</button>`:'';
+    card.innerHTML=`<div class="dt-step-top"><div class="dt-step-num">${String(i+1).padStart(2,'0')}</div><div class="dt-step-info"><div class="dt-step-badge ${bc}">${bt}</div><div class="dt-step-title">${step.title}</div><div class="dt-step-timing">${step.timing}</div></div>${timer}</div><div class="dt-step-body"><ul class="dt-step-instructions">${instr}</ul><div class="dt-step-note">${step.note}</div>${wb}${cbtn}</div>`;
+    container.appendChild(card);
+  });
+}
+
+// ══════════════════════════════════════════════
+//  BREW CONTROL PATCHES
+// ══════════════════════════════════════════════
+function dtManualDone(i){manualDone(i);}
+function dtHandleMaster(){handleMaster();}
+
+const _origActivate=activateTimedStep;
+activateTimedStep=function(idx){
+  _origActivate(idx);
+  document.querySelectorAll('.dt-step').forEach(c=>{c.classList.remove('current');c.classList.add('locked');});
+  for(let j=0;j<idx;j++){const c=document.getElementById('dt-step-'+j);if(c){c.classList.remove('locked','current');c.classList.add('done');}}
+  const card=document.getElementById('dt-step-'+idx);
+  if(card){card.classList.remove('locked','done');card.classList.add('current');setTimeout(()=>{const brew=document.getElementById('dtBrew');if(brew){const br=brew.getBoundingClientRect(),cr=card.getBoundingClientRect();brew.scrollBy({top:cr.top-br.top-120,behavior:'smooth'});}},80);}
+};
+
+const _origFinish=finishTimedStep;
+finishTimedStep=function(idx){
+  _origFinish(idx);
+  const card=document.getElementById('dt-step-'+idx);
+  if(card){card.classList.remove('current');card.classList.add('done');}
+  const prog=document.getElementById('dt-prog-'+idx);if(prog){prog.style.strokeDashoffset=2*Math.PI*30;prog.style.stroke='var(--green)';}
+  const tc=document.getElementById('dt-tc-'+idx);if(tc)tc.textContent='0s';
+};
+
+const _origManualDone=manualDone;
+manualDone=function(i){
+  _origManualDone(i);
+  const c=document.getElementById('dt-step-0');
+  if(c){c.classList.remove('current','locked');c.classList.add('done');}
+};
+
+(function patchTick(){
+  const orig=window.masterTick;
+  window.masterTick=function(now){
+    orig(now);
+    const src=document.getElementById('masterElapsed'),dst=document.getElementById('dtElapsed');
+    if(src&&dst)dst.textContent=src.textContent;
+    // sync left panel elapsed
+    const panelEl=document.getElementById('dtPanelElapsed');
+    if(panelEl&&src)panelEl.textContent=src.textContent;
+    // sync timers
+    const steps=getSteps(coffeeG,waterMl);
+    const idx=timedQueue[timedQueuePos];
+    if(idx===undefined)return;
+    const step=steps[idx];if(!step||step.duration<=0)return;
+    const elapsed=masterElapsedMs-stepStartMs;
+    const remaining=Math.max(0,step.duration*1000-elapsed);
+    const progress=Math.min(1,elapsed/(step.duration*1000));
+    const circ=2*Math.PI*30;
+    const prog=document.getElementById('dt-prog-'+idx);if(prog)prog.style.strokeDashoffset=circ*progress;
+    const tc=document.getElementById('dt-tc-'+idx);if(tc)tc.textContent=Math.ceil(remaining/1000)+'s';
+    if(step.waterTo>step.waterFrom){
+      const wb=document.getElementById('dt-wb-'+idx);if(wb)wb.classList.add('active');
+      const fill=document.getElementById('dt-wf-'+idx);if(fill)fill.style.width=(progress*100)+'%';
+      const val=document.getElementById('dt-wv-'+idx);if(val)val.textContent=Math.round(step.waterFrom+(step.waterTo-step.waterFrom)*Math.min(1,progress))+'ml';
+    }
+    // sync left panel water fill
+    const totalWater=waterMl;
+    const poured=Math.round(step.waterTo*(progress)+(steps.slice(0,idx).reduce((a,s)=>a+(s.waterTo||0),0)));
+    const maxWater=steps[steps.length-1]?.waterTo||totalWater;
+    const waterFill=document.getElementById('dtPanelWaterFill');
+    const waterCur=document.getElementById('dtPanelWaterCur');
+    if(waterFill)waterFill.style.width=Math.min(100,(step.waterTo/maxWater)*100)+'%';
+    if(waterCur)waterCur.textContent=step.waterTo+'ml';
+    // sync current step name
+    const pStepName=document.getElementById('dtPanelStepName');
+    const pStepTiming=document.getElementById('dtPanelStepTiming');
+    if(pStepName)pStepName.textContent=step.title||'';
+    if(pStepTiming&&step.start!==undefined){
+      const fmt=s=>{const m=Math.floor(s/60),sec=s%60;return m+':'+(sec<10?'0':'')+sec;};
+      pStepTiming.textContent=fmt(step.start)+' – '+fmt(step.start+step.duration);
+    }
+  };
+})();
+
+const _origSetMaster=setMasterBtnState;
+setMasterBtnState=function(state){
+  _origSetMaster(state);
+  const btn=document.getElementById('dtMasterBtn'),lbl=document.getElementById('dtMasterLabel'),icon=document.getElementById('dtMasterIcon'),reset=document.getElementById('dtResetLink');
+  if(!btn)return;
+  const steps=getSteps(coffeeG,waterMl);const stepIdx=timedQueue[timedQueuePos];const step=stepIdx!==undefined?steps[stepIdx]:null;
+  let ih,lt;
+  if(state==='init'){ih='<path d="M3 2.5L11 7L3 11.5V2.5Z" fill="currentColor"/>';lt='Start Brew';}
+  else if(state==='running'){ih='<rect x="2.5" y="2" width="3.5" height="10" rx="1.5" fill="currentColor"/><rect x="8" y="2" width="3.5" height="10" rx="1.5" fill="currentColor"/>';lt=(step&&!step.isWait)?'Hold Pour':'Pause';}
+  else if(state==='paused'){ih='<path d="M3 2.5L11 7L3 11.5V2.5Z" fill="currentColor"/>';lt='Continue';}
+  else if(state==='done'){ih='<path d="M2 7L5.5 10.5L12 3.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" fill="none"/>';lt='Start Over';}
+  btn.style.display=state==='init'?'none':'inline-flex';
+  btn.className='dt-master-btn';
+  if(state==='running')btn.classList.add('paused');
+  if(state==='done')btn.classList.add('done-state');
+  if(icon)icon.innerHTML=ih;if(lbl)lbl.textContent=lt;
+  if(reset)reset.style.display=(state==='init'||state==='done')?'none':'block';
+};
+
+const _origPause=pauseBrew;
+pauseBrew=function(){
+  _origPause();
+  const src=document.getElementById('drainHold'),dst=document.getElementById('dtDrain');
+  if(src&&dst)dst.classList.toggle('active',src.classList.contains('active'));
+};
+const _origResume=resumeBrew;
+resumeBrew=function(){
+  _origResume();
+  const d=document.getElementById('dtDrain');if(d)d.classList.remove('active');
+};
+
+const _origReset=resetBrew;
+resetBrew=function(){
+  _origReset();
+  const el=document.getElementById('dtElapsed');if(el)el.textContent='0:00';
+  const mb=document.getElementById('dtMasterBtn');if(mb)mb.style.display='none';
+  const rl=document.getElementById('dtResetLink');if(rl)rl.style.display='none';
+  const d=document.getElementById('dtDrain');if(d)d.classList.remove('active');
+  // reset left panel
+  const panelEl=document.getElementById('dtPanelElapsed');if(panelEl)panelEl.textContent='0:00';
+  const pStepName=document.getElementById('dtPanelStepName');if(pStepName)pStepName.textContent='Not started';
+  const pStepTiming=document.getElementById('dtPanelStepTiming');if(pStepTiming)pStepTiming.textContent='Press Start Brew to begin';
+  const waterFill=document.getElementById('dtPanelWaterFill');if(waterFill)waterFill.style.width='0%';
+  const waterCur=document.getElementById('dtPanelWaterCur');if(waterCur)waterCur.textContent='0 ml';
+  dtRenderSteps();
+};
+
+// ══════════════════════════════════════════════
+//  SHOW/HIDE DESKTOP UI
+// ══════════════════════════════════════════════
+function dtShowOrHide(){
+  const d=window.matchMedia('(min-width:901px)').matches;
+  const dtBar=document.getElementById('dtBar');
+  const dtBrew=document.getElementById('dtBrew');
+  if(dtBar)dtBar.style.display=d?'grid':'none';
+  if(dtBrew)dtBrew.style.display=d?'grid':'none';
+}
+window.addEventListener('resize',dtShowOrHide);
+dtShowOrHide();
+
+// Init — deferred until DOM is fully parsed
+document.addEventListener('DOMContentLoaded', function() {
+  document.querySelectorAll('.dt-ratio-btn').forEach(b=>b.classList.toggle('active',parseInt(b.dataset.ratio)===currentRatio));
+  const ci=document.getElementById('dtCoffeeInput');if(ci)ci.value=coffeeG;
+  const wi=document.getElementById('dtWaterInput');if(wi)wi.value=waterMl;
+  dtUpdatePills();
+  dtRenderSteps();
+  dtShowOrHide();
+});
+
+function showFormula(method, el) {
+  document.querySelectorAll('.formula-tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.formula-block').forEach(b => b.classList.remove('active'));
+  if (el) el.classList.add('active');
+  const block = document.getElementById('formula-' + method);
+  if (block) block.classList.add('active');
+}
+</script>
+
 <!-- ── FLOATING BREW CONTROL ── -->
 <div class="float-brew-bar" id="floatBrewBar">
   <div class="float-step-label" id="floatStepLabel">Ready</div>
@@ -2767,6 +4347,282 @@ if (screen.orientation && screen.orientation.lock) {
     </div>
 
   </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     DESKTOP UI  (hidden on mobile via JS/CSS)
+══════════════════════════════════════════ -->
+
+<!-- Backdrop for gear popover -->
+<div class="dt-backdrop" id="dtBackdrop" onclick="closeDtGear()"></div>
+
+<!-- Fixed top bar -->
+<nav class="dt-bar" id="dtBar">
+
+  <!-- Logo — left -->
+  <div class="dt-logo">
+    <svg viewBox="0 0 48 48" fill="none">
+      <path d="M10 14 L24 40 L38 14" stroke="var(--accent)" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M7 14 L41 14" stroke="var(--accent)" stroke-width="2" stroke-linecap="round"/>
+      <ellipse cx="24" cy="14" rx="8" ry="2.5" stroke="var(--accent)" stroke-width="2" fill="none"/>
+      <path d="M17 20 Q24 22 31 20" stroke="var(--accent)" stroke-width="1" fill="none" stroke-linecap="round" opacity="0.5"/>
+      <line x1="24" y1="40" x2="24" y2="46" stroke="var(--accent)" stroke-width="2" stroke-linecap="round"/>
+      <line x1="18" y1="46" x2="30" y2="46" stroke="var(--accent)" stroke-width="2" stroke-linecap="round"/>
+    </svg>
+    <div>
+      <div class="dt-logo-text">Pour Over</div>
+      <div class="dt-logo-sub">V60 Method</div>
+    </div>
+  </div>
+
+  <!-- Center group: method + ratio + inputs + pills -->
+  <div class="dt-center">
+    <!-- Method selector -->
+    <div class="dt-methods">
+      <button class="dt-method-btn active" data-method="v60" onclick="dtSetMethod('v60',this)">V60</button>
+      <button class="dt-method-btn" data-method="chemex" onclick="dtSetMethod('chemex',this)">Chemex</button>
+      <button class="dt-method-btn" data-method="kalita" onclick="dtSetMethod('kalita',this)">Kalita</button>
+      <button class="dt-method-btn" data-method="origami" onclick="dtSetMethod('origami',this)">Origami</button>
+    </div>
+
+    <!-- Ratio buttons -->
+    <div class="dt-ratio">
+      <div class="dt-ratio-label">Ratio</div>
+      <div class="dt-ratio-btns">
+        <button class="dt-ratio-btn" data-ratio="14" onclick="dtSetRatio(14,this)">1:14</button>
+        <button class="dt-ratio-btn active" data-ratio="15" onclick="dtSetRatio(15,this)">1:15</button>
+        <button class="dt-ratio-btn" data-ratio="16" onclick="dtSetRatio(16,this)">1:16</button>
+        <button class="dt-ratio-btn" data-ratio="17" onclick="dtSetRatio(17,this)">1:17</button>
+      </div>
+
+      <div class="dt-divider"></div>
+
+      <div class="dt-inputs">
+        <div class="dt-input-wrap">
+          <input class="dt-input" id="dtCoffeeInput" type="number" min="1" max="100" value="15" oninput="dtCalcFromCoffee()">
+          <div class="dt-input-unit">g</div>
+        </div>
+        <div class="dt-ratio-label" style="color:var(--text-dim)">→</div>
+        <div class="dt-input-wrap">
+          <input class="dt-input" id="dtWaterInput" type="number" min="1" max="2000" value="225" oninput="dtCalcFromWater()">
+          <div class="dt-input-unit">ml</div>
+        </div>
+      </div>
+
+      <div class="dt-result-pills">
+        <div class="dt-pill">Bloom <strong id="dtBloom">30ml</strong></div>
+        <div class="dt-pill">Target <strong id="dtTime">3:00–3:30</strong></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Right controls -->
+  <div class="dt-right">
+    <button class="dt-gear-btn" id="dtGearBtn" onclick="toggleDtGear()" title="Equipment needed">
+      <svg viewBox="0 0 20 20" fill="none"><rect x="3" y="4" width="14" height="12" rx="2" stroke="currentColor" stroke-width="1.4"/><line x1="7" y1="8" x2="14" y2="8" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/><line x1="7" y1="11" x2="14" y2="11" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/><circle cx="5" cy="8" r="0.8" fill="currentColor"/><circle cx="5" cy="11" r="0.8" fill="currentColor"/></svg>
+    </button>
+    <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()" title="Toggle light/dark">
+      <svg id="themeIcon" viewBox="0 0 20 20" fill="none"><path d="M15 10.5A6.5 6.5 0 0 1 8.5 4a6.5 6.5 0 1 0 6.5 6.5z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </button>
+  </div>
+
+</nav>
+
+<!-- Gear popover -->
+<div class="dt-gear-panel" id="dtGearPanel">
+  <div class="dt-gear-title">What You Need</div>
+  <div class="dt-gear-grid">
+    <div class="dt-gear-item">
+      <svg viewBox="0 0 28 28" fill="none"><path d="M6 8 L14 22 L22 8" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/><line x1="4" y1="8" x2="24" y2="8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+      <div class="dt-gear-item-name">Hario V60</div>
+      <div class="dt-gear-item-note">Size 01 or 02</div>
+    </div>
+    <div class="dt-gear-item">
+      <svg viewBox="0 0 28 28" fill="none"><path d="M8 6 Q8 14 14 20 Q20 14 20 6" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round"/><line x1="8" y1="6" x2="20" y2="6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+      <div class="dt-gear-item-name">Paper Filter</div>
+      <div class="dt-gear-item-note">Rinse before use</div>
+    </div>
+    <div class="dt-gear-item">
+      <svg viewBox="0 0 28 28" fill="none"><rect x="8" y="16" width="12" height="6" rx="2" stroke="currentColor" stroke-width="1.5" fill="none"/><line x1="14" y1="16" x2="14" y2="10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><path d="M11 12 L14 10 L17 12" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <div class="dt-gear-item-name">Gooseneck</div>
+      <div class="dt-gear-item-note">92–96 °C</div>
+    </div>
+    <div class="dt-gear-item">
+      <svg viewBox="0 0 28 28" fill="none"><rect x="8" y="10" width="12" height="12" rx="2" stroke="currentColor" stroke-width="1.5" fill="none"/><line x1="11" y1="10" x2="11" y2="7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><line x1="17" y1="10" x2="17" y2="7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+      <div class="dt-gear-item-name">Scale</div>
+      <div class="dt-gear-item-note">0.1g resolution</div>
+    </div>
+    <div class="dt-gear-item">
+      <svg viewBox="0 0 28 28" fill="none"><circle cx="14" cy="14" r="8" stroke="currentColor" stroke-width="1.5" fill="none"/><line x1="14" y1="10" x2="14" y2="14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><line x1="14" y1="14" x2="17" y2="17" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+      <div class="dt-gear-item-name">Timer</div>
+      <div class="dt-gear-item-note">Precision matters</div>
+    </div>
+    <div class="dt-gear-item">
+      <svg viewBox="0 0 28 28" fill="none"><ellipse cx="14" cy="20" rx="8" ry="3" stroke="currentColor" stroke-width="1.5" fill="none"/><path d="M6 20 L6 10 Q14 6 22 10 L22 20" stroke="currentColor" stroke-width="1.5" fill="none"/></svg>
+      <div class="dt-gear-item-name">Server</div>
+      <div class="dt-gear-item-note">Preheat it</div>
+    </div>
+  </div>
+  <div class="dt-gear-note">Grind fresh · Medium-fine · Like coarse sand · Adjust coarser if too fast, finer if too slow</div>
+</div>
+
+<!-- Full-viewport brew canvas -->
+<div class="dt-brew" id="dtBrew">
+
+  <!-- LEFT PANEL: Live brew status + recipe summary -->
+  <div class="dt-panel-left" id="dtPanelLeft">
+
+    <div class="dt-panel-section">
+      <div class="dt-panel-label">Live Brew</div>
+      <div class="dt-live-elapsed" id="dtPanelElapsed">0:00</div>
+      <div class="dt-live-elapsed-label">Elapsed</div>
+      <div class="dt-live-step" id="dtPanelStep">
+        <div class="dt-live-step-label">Current step</div>
+        <div class="dt-live-step-name" id="dtPanelStepName">Not started</div>
+        <div class="dt-live-step-timing" id="dtPanelStepTiming">Press Start Brew to begin</div>
+      </div>
+    </div>
+
+    <div class="dt-panel-section">
+      <div class="dt-panel-label">Water poured</div>
+      <div class="dt-water-total-track">
+        <div class="dt-water-total-fill" id="dtPanelWaterFill"></div>
+      </div>
+      <div class="dt-water-total-labels">
+        <span class="wt-cur" id="dtPanelWaterCur">0 ml</span>
+        <span id="dtPanelWaterTotal">/ 225 ml</span>
+      </div>
+    </div>
+
+    <div class="dt-panel-section">
+      <div class="dt-panel-label">Recipe</div>
+      <div class="dt-recipe-row">
+        <span class="dt-recipe-key">Coffee</span>
+        <span class="dt-recipe-val"><strong id="dtPanelCoffee">15</strong> g</span>
+      </div>
+      <div class="dt-recipe-row">
+        <span class="dt-recipe-key">Water</span>
+        <span class="dt-recipe-val"><strong id="dtPanelWater">225</strong> ml</span>
+      </div>
+      <div class="dt-recipe-row">
+        <span class="dt-recipe-key">Ratio</span>
+        <span class="dt-recipe-val" id="dtPanelRatio">1:15</span>
+      </div>
+      <div class="dt-recipe-row">
+        <span class="dt-recipe-key">Bloom</span>
+        <span class="dt-recipe-val" id="dtPanelBloom">30 ml</span>
+      </div>
+      <div class="dt-recipe-row">
+        <span class="dt-recipe-key">Target</span>
+        <span class="dt-recipe-val" id="dtPanelTarget">3:00–3:30</span>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="dt-brew-inner">
+
+    <!-- Brew header -->
+    <div class="dt-brew-head">
+      <div>
+        <div class="dt-brew-eyebrow" id="dtBrewEyebrow">Brew Guide · V60 Pour Over</div>
+        <div class="dt-brew-title" id="dtBrewTitle">Pour<br>Over</div>
+      </div>
+      <div class="dt-brew-controls">
+        <div class="dt-elapsed" id="dtElapsed">0:00</div>
+        <div id="dtRecipeLabel" class="dt-recipe-label">15g / 225ml</div>
+        <button class="dt-master-btn" id="dtMasterBtn" onclick="dtHandleMaster()" style="display:none">
+          <svg width="12" height="12" viewBox="0 0 14 14" fill="none" id="dtMasterIcon"><path d="M3 2.5L11 7L3 11.5V2.5Z" fill="currentColor"/></svg>
+          <span id="dtMasterLabel">Start Brew</span>
+        </button>
+        <button class="dt-reset-link" onclick="resetBrew()" id="dtResetLink" style="display:none">Reset</button>
+      </div>
+    </div>
+
+    <!-- Drain hold -->
+    <div class="dt-drain" id="dtDrain">
+      <svg viewBox="0 0 28 28" fill="none"><path d="M6 9 L14 23 L22 9" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/><line x1="4" y1="9" x2="24" y2="9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><path d="M14 25 Q12.5 27.5 14 28.5 Q15.5 27.5 14 25Z" fill="currentColor" opacity="0.8"/></svg>
+      <div>
+        <div class="dt-drain-title">Waiting for filter to drain</div>
+        <div class="dt-drain-sub">Resume when cup has space</div>
+      </div>
+      <div class="dt-drain-dot"></div>
+    </div>
+
+    <!-- Steps injected here -->
+    <div class="dt-steps" id="dtSteps"></div>
+
+  </div>
+
+  <!-- RIGHT PANEL: Technique tips + gear reference -->
+  <div class="dt-panel-right" id="dtPanelRight">
+
+    <div class="dt-panel-section">
+      <div class="dt-panel-label">Temperature</div>
+      <div class="dt-temp-display">
+        <div class="dt-temp-big" id="dtPanelTemp">92–96</div>
+        <div class="dt-temp-unit">°C</div>
+      </div>
+      <div class="dt-temp-note" id="dtPanelTempNote">Off boil · 30 sec rest</div>
+    </div>
+
+    <div class="dt-panel-section">
+      <div class="dt-panel-label">Grind size</div>
+      <div class="dt-grind-visual" id="dtGrindVisual">
+        <div class="dt-grind-bar" style="height:20%"></div>
+        <div class="dt-grind-bar" style="height:35%"></div>
+        <div class="dt-grind-bar" style="height:50%"></div>
+        <div class="dt-grind-bar active" style="height:65%"></div>
+        <div class="dt-grind-bar active" style="height:75%"></div>
+        <div class="dt-grind-bar active" style="height:85%"></div>
+        <div class="dt-grind-bar" style="height:90%"></div>
+        <div class="dt-grind-bar" style="height:95%"></div>
+        <div class="dt-grind-bar" style="height:100%"></div>
+      </div>
+      <div class="dt-grind-labels">
+        <span>Fine</span>
+        <span id="dtGrindLabel">Med-Fine</span>
+        <span>Coarse</span>
+      </div>
+      <div class="dt-tip-card" style="margin-top:12px">
+        <div class="dt-tip-body" id="dtGrindTip">Like coarse sea salt. Adjust coarser if draining too fast (&lt;2:30), finer if too slow (&gt;4:00).</div>
+      </div>
+    </div>
+
+    <div class="dt-panel-section">
+      <div class="dt-panel-label">Equipment</div>
+      <div class="dt-gear-check-item">
+        <svg viewBox="0 0 20 20" fill="none"><path d="M5 10 L10 14 L10 8" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 8 L10 4 L16 8 L16 16 L4 16 Z" stroke="currentColor" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <span id="dtGearDripper">V60 dripper</span>
+      </div>
+      <div class="dt-gear-check-item">
+        <svg viewBox="0 0 20 20" fill="none"><path d="M6 4 Q6 12 10 16 Q14 12 14 4" stroke="currentColor" stroke-width="1.4" fill="none" stroke-linecap="round"/><line x1="6" y1="4" x2="14" y2="4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+        <span>Paper filter (rinse first)</span>
+      </div>
+      <div class="dt-gear-check-item">
+        <svg viewBox="0 0 20 20" fill="none"><path d="M7 18 L7 10 Q10 6 13 10 L13 18" stroke="currentColor" stroke-width="1.4" fill="none" stroke-linecap="round"/><path d="M13 12 Q16 10 16 8 Q16 6 14 7" stroke="currentColor" stroke-width="1.4" fill="none" stroke-linecap="round"/></svg>
+        <span>Gooseneck kettle</span>
+      </div>
+      <div class="dt-gear-check-item">
+        <svg viewBox="0 0 20 20" fill="none"><rect x="5" y="8" width="10" height="8" rx="2" stroke="currentColor" stroke-width="1.4" fill="none"/><line x1="7" y1="8" x2="7" y2="6" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/><line x1="13" y1="8" x2="13" y2="6" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+        <span>Digital scale (0.1g)</span>
+      </div>
+      <div class="dt-gear-check-item">
+        <svg viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="6" stroke="currentColor" stroke-width="1.4" fill="none"/><line x1="10" y1="7" x2="10" y2="10" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/><line x1="10" y1="10" x2="12.5" y2="12.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+        <span>Timer</span>
+      </div>
+    </div>
+
+    <div class="dt-panel-section">
+      <div class="dt-panel-label">Pro tip</div>
+      <div class="dt-tip-card">
+        <div class="dt-tip-title" id="dtProTipTitle">Even saturation</div>
+        <div class="dt-tip-body" id="dtProTipBody">Pour in slow, steady spirals from center outward. Avoid pouring directly on the filter walls.</div>
+      </div>
+    </div>
+
+  </div>
+
 </div>
 
 </body>
